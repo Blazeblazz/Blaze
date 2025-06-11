@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLAZE MINIMAL | Bientôt Disponible</title>
+    <style>
+        :root {
+            --primary-color: #000;
+            --secondary-color: #fff;
+            --background-color: #f5f5f5;
+            --accent-color: #666;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.4;
+            color: var(--primary-color);
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            overflow-x: hidden;
+            width: 100%;
+            background: none;
+            padding-top: 80px; /* Adjust based on header height */
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--secondary-color);
+            box-shadow: var(--shadow);
+            border-radius: 2px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--primary-color);
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            color: var(--accent-color);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .signup-form {
+            margin-top: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        input[type="email"] {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 1px solid #eee;
+            background: var(--background-color);
+            color: var(--primary-color);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        input[type="email"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 3rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+        }
+
+        .nav {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            width: calc(100% - 40px);
+            height: auto;
+            background: linear-gradient(to right, #F1F2F1, #E0E0E0);
+            padding: 0.5rem;
+            z-index: 1000;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+        }
+
+        .nav-content {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--primary-color);
+            letter-spacing: 0.1em;
+            transition: var(--transition);
+            margin-bottom: 0;
+            writing-mode: horizontal-tb;
+            transform: none;
+            text-align: center;
+            padding: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            position: relative;
+            padding: 0.5rem;
+            width: auto;
+            height: auto;
+            display: flex;
+            color: #000;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            writing-mode: horizontal-tb;
+            transform: none;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                width: 100%;
+                height: auto;
+                padding: 1rem;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                background: var(--secondary-color);
+                z-index: 1000;
+                box-shadow: var(--shadow);
+            }
+
+            .nav-content {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0;
+            }
+
+            .nav-brand {
+                writing-mode: horizontal-tb;
+                transform: none;
+                margin-bottom: 0;
+                font-size: 1.2rem;
+                padding: 0.5rem;
+            }
+
+            .nav-links {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: var(--secondary-color);
+                padding: 6rem 2rem 2rem;
+                flex-direction: column;
+                gap: 2rem;
+                transform: translateX(-100%);
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 999;
+            }
+
+            .nav-links.active {
+                transform: translateX(0);
+            }
+
+            .nav-link {
+                writing-mode: horizontal-tb;
+                transform: none;
+                width: 100%;
+                text-align: center;
+                padding: 1rem;
+                font-size: 1.2rem;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.3s ease;
+                touch-action: manipulation;
+            }
+
+            .nav-links.active .nav-link {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .nav-links.active .nav-link:nth-child(1) { transition-delay: 0.1s; }
+            .nav-links.active .nav-link:nth-child(2) { transition-delay: 0.2s; }
+            .nav-links.active .nav-link:nth-child(3) { transition-delay: 0.3s; }
+
+            .nav-link:hover {
+                transform: none;
+                background: var(--background-color);
+                color: var(--primary-color);
+            }
+
+            .mobile-menu-btn {
+                display: block;
+                width: 40px;
+                height: 40px;
+                padding: 8px;
+                touch-action: manipulation;
+            }
+
+            /* Enhanced touch targets */
+            .nav-link,
+            .shop-btn,
+            .submit-btn,
+            .newsletter-btn,
+            .checkout-btn,
+            .quantity-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+        /* Additional breakpoint for very small devices */
+        @media (max-width: 360px) {
+
+        }
+        /* Add loading state styles */
+        img {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        img.loaded {
+            opacity: 1;
+        }
+
+        /* Progress bar and back to top styles */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            z-index: 1001;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        @media (max-width: 768px) {
+            .back-to-top {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 36px;
+                height: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="index.html" class="nav-brand">BLAZE</a>
+      <div class="nav-links">
+        <a href="index.html#shop" class="nav-link">BOUTIQUE</a>
+        <a href="index.html#about" class="nav-link">À PROPOS</a>
+        <a href="help.html" class="nav-link">AIDE</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Bientôt Disponible</h1>
+    <p>Nous travaillons actuellement sur quelque chose d'exceptionnel. Inscrivez-vous pour être parmi les premiers à le découvrir.</p>
+    
+    <div class="signup-form">
+      <form id="signupForm">
+        <div class="input-group">
+          <input type="email" placeholder="Votre adresse email" required>
+          <button type="submit">S'INSCRIRE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Enhanced mobile menu functionality
+    const mobileMenuBtn = document.createElement('button');
+    mobileMenuBtn.className = 'mobile-menu-btn';
+    mobileMenuBtn.innerHTML = '<span></span><span></span><span></span>';
+    document.querySelector('.nav-content').appendChild(mobileMenuBtn);
+
+    const navLinks = document.querySelector('.nav-links');
+    let isMenuOpen = false;
+    
+    mobileMenuBtn.addEventListener('click', () => {
+      isMenuOpen = !isMenuOpen;
+      mobileMenuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+      document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (isMenuOpen && !navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+        isMenuOpen = false;
+        mobileMenuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        isMenuOpen = false;
+        mobileMenuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = this.querySelector('input[type="email"]').value;
+      const button = this.querySelector('button');
+      
+      // Disable button and show loading state
+      button.disabled = true;
+      button.textContent = 'ENVOI...';
+      
+      // Create form data
+      const formData = new FormData();
+      formData.append('email', email);
+      
+      // Send data using XMLHttpRequest
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://script.google.com/macros/s/AKfycby7LTTTmT-NluQMOBZKTld1z1JNKEDvBVpyQbIXjhrHvi3TurDxeJVhyji6tJmfbYs/exec', true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      
+      xhr.onload = function() {
+        // Reset button state
+        button.disabled = false;
+        button.textContent = 'S\'INSCRIRE';
+        
+        if (xhr.status === 0 || xhr.status === 200) {
+          // Show success message
+          const successMessage = document.createElement('div');
+          successMessage.style.cssText = `
+            color: #4CAF50;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+          `;
+          successMessage.textContent = 'Merci pour votre inscription!';
+          
+          // Remove any existing message
+          const existingMessage = document.querySelector('.success-message');
+          if (existingMessage) {
+            existingMessage.remove();
+          }
+          this.closest('form').appendChild(successMessage);
+          this.reset();
+        } else {
+          // Show error message
+          const errorMessage = document.createElement('div');
+          errorMessage.style.cssText = `
+            color: #e63946;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+          `;
+          errorMessage.textContent = 'Une erreur est survenue. Veuillez réessayer.';
+          
+          // Remove any existing message
+          const existingMessage = document.querySelector('.success-message');
+          if (existingMessage) {
+            existingMessage.remove();
+          }
+          this.closest('form').appendChild(errorMessage);
+        }
+      }.bind(this);
+      
+      xhr.onerror = function() {
+        // Reset button state
+        button.disabled = false;
+        button.textContent = 'S\'INSCRIRE';
+        
+        // Show error message for network issues
+        const errorMessage = document.createElement('div');
+        errorMessage.style.cssText = `
+          color: #e63946;
+          margin-top: 1rem;
+          font-size: 0.9rem;
+          font-weight: 500;
+        `;
+        errorMessage.textContent = 'Problème de connexion. Veuillez vérifier votre réseau.';
+        
+        // Remove any existing message
+        const existingMessage = document.querySelector('.success-message');
+        if (existingMessage) {
+          existingMessage.remove();
+        }
+        this.closest('form').appendChild(errorMessage);
+      }.bind(this);
+      
+      xhr.send('email=' + encodeURIComponent(email));
+    });
+  </script>
+</body>
+</html> 

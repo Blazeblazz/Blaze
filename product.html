@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product - BLAZE</title>
+  <style>
+    /* Include all the same styles from index.html */
+    :root {
+      --primary-color: #000;
+      --secondary-color: #fff;
+      --background-color: #f5f5f5;
+      --accent-color: #666;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --hover-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.4;
+      color: var(--primary-color);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      overflow-x: hidden;
+      width: 100%;
+      background: none;
+    }
+
+    /* Navigation Styles */
+    .nav {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      width: calc(100% - 40px);
+      height: auto;
+      background: linear-gradient(to right, #F1F2F1, #E0E0E0);
+      padding: 0.5rem;
+      z-index: 1000;
+      transition: var(--transition);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 8px;
+    }
+
+    .nav-content {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0;
+    }
+
+    .nav-brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-decoration: none;
+      color: var(--primary-color);
+      letter-spacing: 0.1em;
+      transition: var(--transition);
+      margin-bottom: 0;
+      writing-mode: horizontal-tb;
+      transform: none;
+      text-align: center;
+      padding: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: row;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--accent-color);
+      font-size: 0.9rem;
+      transition: var(--transition);
+      position: relative;
+      padding: 0.5rem;
+      width: auto;
+      height: auto;
+      display: flex;
+      color: #000;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      writing-mode: horizontal-tb;
+      transform: none;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--primary-color);
+      transition: var(--transition);
+    }
+
+    .nav-link:hover {
+      color: var(--primary-color);
+      transform: translateY(-5px);
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      width: 40px;
+      height: 40px;
+      padding: 8px;
+      touch-action: manipulation;
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      z-index: 1001;
+    }
+
+    .mobile-menu-btn span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: var(--primary-color);
+      margin: 6px 0;
+      transition: var(--transition);
+      transform-origin: center;
+    }
+
+    .mobile-menu-btn.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .mobile-menu-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .mobile-menu-btn.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* Footer Styles */
+    .footer {
+      width: 100%;
+      background: var(--primary-color);
+      color: var(--secondary-color);
+      padding: 3rem 0 1.5rem;
+      position: relative;
+      margin-left: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: auto;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4rem;
+      text-align: left;
+      padding: 0 2rem;
+      width: 100%;
+    }
+
+    .footer-logo {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .footer-logo-text {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--secondary-color);
+      position: relative;
+      display: inline-block;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .footer-logo-text:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .footer-section {
+      position: relative;
+    }
+
+    .footer-section h3 {
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.1em;
+      position: relative;
+      display: inline-block;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--secondary-color);
+    }
+
+    .footer-section h3::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: var(--secondary-color);
+      transition: var(--transition);
+    }
+
+    .footer-section:hover h3::after {
+      width: 100%;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+
+    .footer-link {
+      margin-bottom: 0;
+    }
+
+    .footer-link a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      transition: var(--transition);
+      display: inline-block;
+      position: relative;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 0.2rem 0;
+    }
+
+    .footer-section p {
+      font-size: 0.8rem;
+      color: var(--accent-color);
+      margin-bottom: 1.2rem;
+      line-height: 1.6;
+    }
+
+    .newsletter-form {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+
+    .newsletter-input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--secondary-color);
+      font-size: 0.8rem;
+      transition: var(--transition);
+      border-radius: 4px;
+    }
+
+    .newsletter-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .newsletter-btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--secondary-color);
+      color: var(--primary-color);
+      border: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      font-weight: 700;
+      border-radius: 4px;
+    }
+
+    .newsletter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--hover-shadow);
+      opacity: 0.9;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 2.5rem auto 0;
+      padding: 1.5rem 2rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--accent-color);
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .footer-bottom p {
+      margin: 0;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .social-link {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      transition: var(--transition);
+      position: relative;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .social-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--secondary-color);
+      transition: var(--transition);
+    }
+
+    .social-link:hover {
+      color: var(--secondary-color);
+    }
+
+    .social-link:hover::after {
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .nav {
+        width: calc(100% - 40px);
+        height: auto;
+        padding: 0.5rem;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: linear-gradient(to right, #F1F2F1, #E0E0E0);
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+
+      .nav-content {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+        position: relative;
+      }
+
+      .nav-brand {
+        writing-mode: horizontal-tb;
+        transform: none;
+        margin-bottom: 0;
+        font-size: 1.2rem;
+        padding: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: linear-gradient(to right, #F1F2F1, #E0E0E0);
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        transform: translateY(-10px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 999;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 1rem;
+      }
+
+      .nav-links.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .nav-link {
+        writing-mode: horizontal-tb;
+        transform: none;
+        width: 100%;
+        text-align: left;
+        padding: 1rem 1.2rem;
+        font-size: 0.9rem;
+        opacity: 1;
+        transform: none;
+        transition: all 0.3s ease;
+        touch-action: manipulation;
+        border-radius: 4px;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        display: block;
+      }
+
+      .nav-link:hover {
+        background: rgba(0, 0, 0, 0.05);
+        transform: translateX(5px);
+      }
+
+      .nav-link::after {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+        touch-action: manipulation;
+      }
+
+      .footer {
+        padding: 2rem 0 1rem;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        text-align: center;
+        padding: 0 1.5rem;
+      }
+
+      .footer-links {
+        align-items: center;
+      }
+
+      .footer-section p {
+        max-width: 400px;
+        margin: 0 auto 1.2rem;
+      }
+
+      .newsletter-form {
+        align-items: center;
+        max-width: 400px;
+        margin: 0.5rem auto 0;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding: 1.5rem 1.5rem 0;
+      }
+
+      .social-links {
+        justify-content: center;
+      }
+    }
+
+    /* Product Page Specific Styles */
+    .product-detail {
+      padding: 120px 2rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .product-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .product-gallery {
+      position: relative;
+    }
+
+    .main-image {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .thumbnail-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .thumbnail {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .thumbnail:hover {
+      transform: scale(1.05);
+    }
+
+    .product-info {
+      padding: 1rem 0;
+    }
+
+    .product-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+
+    .product-price {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .current-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .original-price {
+      color: var(--accent-color);
+      text-decoration: line-through;
+    }
+
+    .discount-badge {
+      background: #e63946;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .product-description {
+      font-size: 1.1rem;
+      color: var(--accent-color);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+
+    .size-selector {
+      margin-bottom: 2rem;
+    }
+
+    .size-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .size-options {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .size-option {
+      padding: 0.8rem 1.5rem;
+      border: 2px solid var(--primary-color);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .size-option:hover {
+      background: var(--primary-color);
+      color: var(--secondary-color);
+    }
+
+    .size-option.selected {
+      background: var(--primary-color);
+      color: var(--secondary-color);
+    }
+
+    .add-to-cart {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-color);
+      color: var(--secondary-color);
+      border: none;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      font-weight: 700;
+      border-radius: 4px;
+      margin-bottom: 2rem;
+    }
+
+    .add-to-cart:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .product-meta {
+      border-top: 1px solid #eee;
+      padding-top: 2rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .meta-label {
+      font-weight: 600;
+      min-width: 120px;
+    }
+
+    .meta-value {
+      color: var(--accent-color);
+    }
+
+    @media (max-width: 1024px) {
+      .product-container {
+        gap: 3rem;
+      }
+
+      .product-title {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .product-detail {
+        padding: 100px 1rem 2rem;
+      }
+
+      .product-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .product-title {
+        font-size: 1.8rem;
+      }
+
+      .thumbnail-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .product-detail {
+        padding: 80px 1rem 2rem;
+      }
+
+      .product-title {
+        font-size: 1.5rem;
+      }
+
+      .thumbnail-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+      }
+
+      .size-options {
+        flex-wrap: wrap;
+      }
+
+      .size-option {
+        padding: 0.6rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="index.html" class="nav-brand">BLAZE</a>
+      <div class="nav-links">
+        <a href="index.html#shop" class="nav-link">BOUTIQUE</a>
+        <a href="index.html#about" class="nav-link">À PROPOS</a>
+        <a href="help.html" class="nav-link">AIDE</a>
+      </div>
+      <button class="mobile-menu-btn" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Product Detail Section -->
+  <main class="product-detail">
+    <div class="product-container">
+      <div class="product-gallery">
+        <img src="" alt="" class="main-image" id="mainImage">
+        <div class="thumbnail-grid" id="thumbnailGrid">
+          <!-- Thumbnails will be added dynamically -->
+        </div>
+      </div>
+      <div class="product-info">
+        <h1 class="product-title" id="productTitle"></h1>
+        <div class="product-price">
+          <span class="current-price" id="currentPrice"></span>
+          <span class="original-price" id="originalPrice"></span>
+          <span class="discount-badge" id="discountBadge"></span>
+        </div>
+        <p class="product-description" id="productDescription"></p>
+        <button class="add-to-cart">Commander</button>
+        <div class="product-meta">
+          <div class="meta-item">
+            <span class="meta-label">Matériau:</span>
+            <span class="meta-value">96% Coton, 4% Élasthanne</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Livraison:</span>
+            <span class="meta-value">2-3 jours ouvrés</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <a href="index.html" class="footer-logo-text">BLAZE</a>
+    </div>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>AIDE</h3>
+        <ul class="footer-links">
+          <li class="footer-link"><a href="help.html#shipping">LIVRAISON</a></li>
+          <li class="footer-link"><a href="help.html#returns">RETOURS</a></li>
+          <li class="footer-link"><a href="help.html#contact">CONTACT</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>À PROPOS</h3>
+        <ul class="footer-links">
+          <li class="footer-link"><a href="index.html#about">NOTRE HISTOIRE</a></li>
+          <li class="footer-link"><a href="index.html#about">CARRIÈRES</a></li>
+          <li class="footer-link"><a href="index.html#about">PRESSE</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>NEWSLETTER</h3>
+        <p>Inscrivez-vous pour recevoir des mises à jour, des offres exclusives et plus encore.</p>
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" class="newsletter-input" placeholder="Entrez votre email" required>
+          <button type="submit" class="newsletter-btn">
+            <span class="btn-text">S'INSCRIRE</span>
+            <span class="btn-loading" style="display: none;">
+              <svg width="20" height="20" viewBox="0 0 20 20">
+                <circle cx="10" cy="10" r="8" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="30" stroke-dashoffset="0">
+                  <animateTransform attributeName="transform" type="rotate" from="0 10 10" to="360 10 10" dur="1s" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+            </span>
+          </button>
+          <div class="newsletter-message" style="display: none;"></div>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 BLAZE. TOUS DROITS RÉSERVÉS.</p>
+      <div class="social-links">
+        <a href="#" class="social-link">INSTAGRAM</a>
+        <a href="#" class="social-link">TWITTER</a>
+        <a href="#" class="social-link">FACEBOOK</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    // Product data (same as in index.html)
+    const products = [
+      {
+        id: 1,
+        name: 'Lost in Casablanca',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Lost in Casablanca/Lost-in-casablanca.webp',
+        category: 't-shirts',
+        description: 'Le t-shirt "Lost in Casablanca" capture l\'essence de la ville blanche avec un design unique et moderne. Fabriqué en coton premium, ce t-shirt arbore un graphisme distinctif inspiré par l\'architecture et la culture de Casablanca. Sa coupe confortable et ses finitions soignées en font une pièce essentielle pour les amateurs de style urbain.'
+      },
+      {
+        id: 2,
+        name: 'Red Rug',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Red Rug/Red-Rug.webp',
+        category: 't-shirts',
+        description: 'Le t-shirt "Red Rug" célèbre l\'artisanat marocain avec un design inspiré des tapis traditionnels. Ce t-shirt en coton biologique présente un motif unique qui rend hommage aux motifs géométriques des tapis berbères. Sa coupe moderne et son confort exceptionnel en font une pièce distinctive pour les amateurs de style ethnique.'
+      },
+      {
+        id: 3,
+        name: 'Turtle Rush',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Turtle Rush/Turtle-Rush.webp',
+        category: 't-shirts',
+        description: 'Le t-shirt "Turtle Rush" allie style et confort avec un design inspiré de la nature. Ce t-shirt en coton premium présente un graphisme unique qui évoque la beauté des tortues marines. Sa coupe moderne et ses finitions soignées en font une pièce essentielle pour les amateurs de style minimaliste.'
+      },
+      {
+        id: 4,
+        name: 'Whispering Wildflowers',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Whispering Wildflowers/Whispering-Wildflowers.webp',
+        category: 't-shirts',
+        description: 'Le t-shirt "Whispering Wildflowers" capture la beauté sauvage des fleurs avec un design délicat et poétique. Ce t-shirt en coton biologique présente un motif unique inspiré par la flore marocaine. Sa coupe élégante et ses finitions soignées en font une pièce distinctive pour les amateurs de style naturel.'
+      }
+    ];
+
+    // Find the product
+    const product = products.find(p => p.id === parseInt(productId));
+
+    if (product) {
+      // Update page title
+      document.title = `${product.name} - BLAZE`;
+
+      // Update product details
+      document.getElementById('productTitle').textContent = product.name;
+      document.getElementById('currentPrice').textContent = `${product.price} MAD`;
+      document.getElementById('originalPrice').textContent = `${product.compareAtPrice} MAD`;
+      document.getElementById('discountBadge').textContent = `-${Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)}%`;
+      document.getElementById('productDescription').textContent = product.description;
+      document.getElementById('mainImage').src = product.image;
+      document.getElementById('mainImage').alt = product.name;
+
+      // Add thumbnails (using the same image for now, but you can add more images)
+      const thumbnailGrid = document.getElementById('thumbnailGrid');
+      for (let i = 0; i < 4; i++) {
+        const thumbnail = document.createElement('img');
+        thumbnail.src = product.image;
+        thumbnail.alt = `${product.name} - Vue ${i + 1}`;
+        thumbnail.className = 'thumbnail';
+        thumbnail.addEventListener('click', () => {
+          document.getElementById('mainImage').src = thumbnail.src;
+        });
+        thumbnailGrid.appendChild(thumbnail);
+      }
+    } else {
+      // Handle product not found
+      window.location.href = 'index.html';
+    }
+
+    // Add to cart functionality
+    const addToCartBtn = document.querySelector('.add-to-cart');
+    addToCartBtn.addEventListener('click', () => {
+      // Redirect to order form with product information
+      const productInfo = {
+        id: product.id,
+        name: product.name,
+        price: product.price
+      };
+      const queryString = new URLSearchParams(productInfo).toString();
+      window.location.href = `order.html?${queryString}`;
+    });
+
+    // Mobile menu functionality
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    let isMenuOpen = false;
+    
+    mobileMenuBtn.addEventListener('click', () => {
+      isMenuOpen = !isMenuOpen;
+      mobileMenuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+      document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+    });
+
+    // Newsletter form handling
+    const newsletterForm = document.getElementById('newsletterForm');
+    const newsletterMessage = document.querySelector('.newsletter-message');
+    const btnText = document.querySelector('.btn-text');
+    const btnLoading = document.querySelector('.btn-loading');
+
+    newsletterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = newsletterForm.querySelector('input[type="email"]').value;
+      
+      btnText.style.display = 'none';
+      btnLoading.style.display = 'block';
+      newsletterForm.querySelector('button').disabled = true;
+
+      try {
+        const encodedEmail = encodeURIComponent(email);
+        await fetch(`https://script.google.com/macros/s/AKfycbxN4JJ-EFTCH2jF5xromEsb0eYw-W1q0Z15m2dBCLyMCljr55Rgs-2WNZnrHnR_0ndG7Q/exec?email=${encodedEmail}`, {
+          method: 'GET',
+          mode: 'no-cors'
+        });
+
+        newsletterMessage.textContent = 'Merci pour votre inscription!';
+        newsletterMessage.style.color = '#4CAF50';
+        newsletterForm.reset();
+      } catch (error) {
+        newsletterMessage.textContent = 'Une erreur est survenue. Veuillez réessayer.';
+        newsletterMessage.style.color = '#f44336';
+      } finally {
+        btnText.style.display = 'block';
+        btnLoading.style.display = 'none';
+        newsletterForm.querySelector('button').disabled = false;
+        newsletterMessage.style.display = 'block';
+        
+        setTimeout(() => {
+          newsletterMessage.style.display = 'none';
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html> 

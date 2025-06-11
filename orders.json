@@ -1,0 +1,14 @@
+{
+  "orders": [
+    {
+      "productId": "1",
+      "productName": "Lost in Casablanca",
+      "productPrice": "129",
+      "customerName": "Tecc Hubb",
+      "city": "Casa",
+      "phone": "0637921431",
+      "orderId": "1749658348118",
+      "timestamp": "2025-06-11T16:12:28.118Z"
+    }
+  ]
+}
