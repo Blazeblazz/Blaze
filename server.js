@@ -6,11 +6,12 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for all routes
+// Enable CORS for all routes with more specific configuration
 app.use(cors({
-    origin: '*', // Allow all origins
-    methods: ['GET', 'POST'], // Allow these methods
-    allowedHeaders: ['Content-Type'] // Allow these headers
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 // Parse JSON bodies
@@ -123,14 +124,32 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server with error handling
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use. Please try a different port or kill the existing process.`);
-        process.exit(1);
+        console.error(`Port ${PORT} is already in use. Trying to kill the process...`);
+        // Try to kill the process using the port
+        require('child_process').exec(`netstat -ano | findstr :${PORT}`, (error, stdout) => {
+            if (stdout) {
+                const pid = stdout.split(' ').filter(Boolean).pop();
+                if (pid) {
+                    require('child_process').exec(`taskkill /F /PID ${pid}`, (err) => {
+                        if (err) {
+                            console.error('Failed to kill process:', err);
+                            process.exit(1);
+                        } else {
+                            console.log(`Killed process ${pid} using port ${PORT}`);
+                            // Try to start the server again
+                            server.listen(PORT);
+                        }
+                    });
+                }
+            }
+        });
     } else {
         console.error('Server error:', err);
+        process.exit(1);
     }
 }); 
