@@ -21,11 +21,11 @@ const validateOrder = (req, res, next) => {
     }
 
     // Validate phone number (more flexible format)
-    const phoneRegex = /^(?:(?:\+|00)212|0)?[5-7]\d{8}$/;
+    const phoneRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
     if (!phoneRegex.test(phone)) {
         return res.status(400).json({ 
             success: false, 
-            error: 'Format de numéro de téléphone invalide. Utilisez un numéro marocain valide (ex: 0612345678)' 
+            error: 'Format de numéro de téléphone invalide. Exemple: 0612345678 ou +212612345678' 
         });
     }
 
