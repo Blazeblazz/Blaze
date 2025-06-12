@@ -913,19 +913,6 @@
       window.location.href = 'index.html';
     }
 
-    // Add to cart functionality
-    const addToCartBtn = document.querySelector('.add-to-cart');
-    addToCartBtn.addEventListener('click', () => {
-      // Redirect to order form with product information
-      const productInfo = {
-        id: product.id,
-        name: product.name,
-        price: product.price
-      };
-      const queryString = new URLSearchParams(productInfo).toString();
-      window.location.href = `order.html?${queryString}`;
-    });
-
     // Mobile menu functionality
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');
