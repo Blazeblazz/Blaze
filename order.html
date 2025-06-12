@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commander - BLAZE</title>
+    <link rel="icon" type="image/webp" href="images/Favicon/FAVICON.webp">
+    <style>
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #333333;
+            --text-color: #000000;
+            --background-color: #FFFFFF;
+            --border-color: #CCCCCC;
+            --hover-color: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: var(--background-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .back-link {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--hover-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .order-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .order-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .order-form:hover {
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-summary {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 6rem;
+            height: fit-content;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .order-summary:hover {
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            color: var(--text-color);
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f8f8;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.2rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: var(--text-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+            padding: 0.5rem;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+        }
+
+        .success-message {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .product-details {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .product-image:hover {
+            transform: scale(1.02);
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .product-price {
+            font-size: 2rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border-color);
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .footer {
+            background-color: var(--background-color);
+            padding: 2rem 0;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            .order-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .order-form,
+            .order-summary {
+                padding: 1.5rem;
+            }
+
+            .order-summary {
+                position: static;
+            }
+
+            .product-image {
+                height: 300px;
+            }
+
+            .form-title {
+                font-size: 1.75rem;
+            }
+
+            .product-name {
+                font-size: 1.25rem;
+            }
+
+            .product-price {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="index.html" class="logo">BLAZE</a>
+            <a href="product.html" class="back-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Retour au produit
+            </a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="order-layout">
+            <form id="orderForm" class="order-form">
+                <h1 class="form-title">Commander</h1>
+                
+                <div id="successMessage" class="success-message">
+                    Votre commande a été enregistrée avec succès!
+                </div>
+
+                <div class="form-group">
+                    <label for="fullName">Nom complet</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                    <div class="error-message" id="fullNameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">Ville</label>
+                    <input type="text" id="city" name="city" placeholder="Entrez votre ville" required>
+                    <div class="error-message" id="cityError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Numéro de téléphone</label>
+                    <input type="tel" id="phone" name="phone" placeholder="06XXXXXXXX" required>
+                    <div class="error-message" id="phoneError"></div>
+                </div>
+
+                <button type="submit" class="submit-btn">Commander</button>
+            </form>
+
+            <div class="order-summary">
+                <h2 class="summary-title">Résumé de la commande</h2>
+                
+                <div class="product-details">
+                    <img id="productImage" class="product-image" src="" alt="Product Image">
+                    <h3 id="productName" class="product-name"></h3>
+                    <p id="productPrice" class="product-price"></p>
+                </div>
+
+                <div class="summary-item">
+                    <span>Sous-total</span>
+                    <span id="subtotal"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Livraison</span>
+                    <span>Gratuite</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span id="total"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 BLAZE. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Get product details from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        const productName = urlParams.get('name');
+        const productPrice = urlParams.get('price');
+        const productImage = urlParams.get('image');
+
+        // Update product details in the summary
+        document.getElementById('productImage').src = productImage || 'images/placeholder.webp';
+        document.getElementById('productName').textContent = productName || 'Produit';
+        document.getElementById('productPrice').textContent = productPrice ? `${productPrice} MAD` : '0 MAD';
+        document.getElementById('subtotal').textContent = productPrice ? `${productPrice} MAD` : '0 MAD';
+        document.getElementById('total').textContent = productPrice ? `${productPrice} MAD` : '0 MAD';
+
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            
+            // Get form data
+            const formData = {
+                fullName: document.getElementById('fullName').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                productId,
+                productName,
+                productPrice,
+                productImage
+            };
+
+            // Validate phone number (Moroccan format)
+            const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
+            if (!phoneRegex.test(formData.phone)) {
+                const phoneError = document.getElementById('phoneError');
+                phoneError.textContent = 'Veuillez entrer un numéro de téléphone marocain valide';
+                phoneError.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show success message
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('orderForm').reset();
+                    
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                } else {
+                    throw new Error(data.message || 'Une erreur est survenue');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Une erreur est survenue lors de l\'envoi de votre commande. Veuillez réessayer.');
+            }
+        });
+    </script>
+</body>
+</html> 
