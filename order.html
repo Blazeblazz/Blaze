@@ -465,7 +465,10 @@
       <!-- Order Form -->
       <div class="order-form">
         <h2 class="form-title">Informations de livraison</h2>
-        <form id="orderForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <form id="orderForm" action="https://formsubmit.co/your-email@example.com" method="POST">
+          <input type="hidden" name="_subject" value="Nouvelle commande BLAZE">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_next" value="https://blazeblazz.github.io/Blaze/order-success.html">
           <input type="hidden" name="productId" id="productId">
           <input type="hidden" name="productName" id="productName">
           <input type="hidden" name="productPrice" id="productPrice">
@@ -502,20 +505,12 @@
     // Set hidden form fields
     document.getElementById('productId').value = productId;
     document.getElementById('productName').value = productName;
-    document.getElementById('productPrice').value = productPrice;
+    document.getElementById('productPrice').value = `${productPrice} MAD`;
 
     // Set product image
     const productImage = document.getElementById('productImage');
     productImage.src = `images/products/${productName}/${productName.replace(/\s+/g, '-')}.webp`;
     productImage.alt = productName;
-
-    // Handle form submission
-    const orderForm = document.getElementById('orderForm');
-    orderForm.addEventListener('submit', (e) => {
-        // Form will be submitted to Formspree
-        // You'll receive the order details in your email
-        // And can view them in your Formspree dashboard
-    });
 
     // Mobile menu functionality
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
