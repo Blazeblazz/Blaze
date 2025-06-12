@@ -3,178 +3,181 @@ const fs = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
+app.use(express.static('.')); // Serve static files from current directory
 
-// Serve static files from root directory
-app.use(express.static('./'));
-
-// Orders data file path
-const ORDERS_FILE = path.join(__dirname, 'orders.json');
-
-// Initialize orders file if it doesn't exist
-async function initializeOrdersFile() {
-    try {
-        await fs.access(ORDERS_FILE);
-    } catch {
-        await fs.writeFile(ORDERS_FILE, JSON.stringify([], null, 2));
+// Validation middleware
+const validateOrder = (req, res, next) => {
+    const { productId, productName, customerName, city, phone } = req.body;
+    
+    if (!productId || !productName || !customerName || !city || !phone) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Missing required fields' 
+        });
     }
-}
 
-// Read orders from file
+    // Validate phone number (Moroccan format)
+    const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
+    if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Invalid phone number format' 
+        });
+    }
+
+    next();
+};
+
+// Read orders from JSON file
 async function readOrders() {
     try {
-        const data = await fs.readFile(ORDERS_FILE, 'utf8');
+        const data = await fs.readFile('orders.json', 'utf8');
         return JSON.parse(data);
     } catch (error) {
-        console.error('Error reading orders:', error);
-        return [];
+        return { orders: [] };
     }
 }
 
-// Write orders to file
+// Write orders to JSON file
 async function writeOrders(orders) {
-    try {
-        await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2));
-    } catch (error) {
-        console.error('Error writing orders:', error);
-        throw error;
-    }
+    await fs.writeFile('orders.json', JSON.stringify(orders, null, 2));
 }
 
-// API Routes
-app.post('/api/orders', async (req, res) => {
+// Handle order submission
+app.post('/submit-order', validateOrder, async (req, res) => {
     try {
-        const { fullName, city, phone, address, product, quantity, paymentMethod } = req.body;
-
-        // Validate required fields
-        if (!fullName || !city || !phone || !product || !quantity || !paymentMethod) {
-            return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis' });
-        }
-
-        // Validate phone number format
-        if (!/^(05|06|07)[0-9]{8}$/.test(phone)) {
-            return res.status(400).json({ error: 'Numéro de téléphone invalide' });
-        }
-
+        const orderData = req.body;
         const orders = await readOrders();
-        const newOrder = {
-            id: Date.now().toString(),
-            fullName,
-            city,
-            phone,
-            address: address || '',
-            product,
-            quantity,
-            paymentMethod,
-            status: 'pending',
-            timestamp: new Date().toISOString()
+        
+        // Add timestamp and order ID
+        const order = {
+            ...orderData,
+            orderId: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            status: 'pending'
         };
-
-        orders.push(newOrder);
+        
+        orders.orders.push(order);
         await writeOrders(orders);
-
-        res.status(201).json({ message: 'Commande créée avec succès', order: newOrder });
+        
+        res.json({ 
+            success: true, 
+            orderId: order.orderId,
+            message: 'Order submitted successfully'
+        });
     } catch (error) {
-        console.error('Error creating order:', error);
-        res.status(500).json({ error: 'Erreur lors de la création de la commande' });
+        console.error('Error saving order:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to save order' 
+        });
     }
 });
 
-app.get('/api/orders', async (req, res) => {
+// Get all orders
+app.get('/orders', async (req, res) => {
     try {
         const orders = await readOrders();
         res.json(orders);
     } catch (error) {
-        console.error('Error fetching orders:', error);
-        res.status(500).json({ error: 'Erreur lors de la récupération des commandes' });
+        res.status(500).json({ 
+            error: 'Failed to fetch orders' 
+        });
     }
 });
 
-app.put('/api/orders/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
-
-        if (!status) {
-            return res.status(400).json({ error: 'Statut requis' });
-        }
-
-        const orders = await readOrders();
-        const orderIndex = orders.findIndex(order => order.id === id);
-
-        if (orderIndex === -1) {
-            return res.status(404).json({ error: 'Commande non trouvée' });
-        }
-
-        orders[orderIndex].status = status;
-        await writeOrders(orders);
-
-        res.json({ message: 'Statut de la commande mis à jour', order: orders[orderIndex] });
-    } catch (error) {
-        console.error('Error updating order:', error);
-        res.status(500).json({ error: 'Erreur lors de la mise à jour de la commande' });
-    }
-});
-
-app.delete('/api/orders/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const orders = await readOrders();
-        const filteredOrders = orders.filter(order => order.id !== id);
-
-        if (filteredOrders.length === orders.length) {
-            return res.status(404).json({ error: 'Commande non trouvée' });
-        }
-
-        await writeOrders(filteredOrders);
-        res.json({ message: 'Commande supprimée avec succès' });
-    } catch (error) {
-        console.error('Error deleting order:', error);
-        res.status(500).json({ error: 'Erreur lors de la suppression de la commande' });
-    }
-});
-
-// Export orders to CSV
-app.get('/api/orders/export/csv', async (req, res) => {
+// Get single order
+app.get('/orders/:orderId', async (req, res) => {
     try {
         const orders = await readOrders();
-        const headers = ['ID', 'Nom', 'Ville', 'Téléphone', 'Adresse', 'Produit', 'Quantité', 'Statut', 'Date'];
+        const order = orders.orders.find(o => o.orderId === req.params.orderId);
         
-        const csvContent = [
-            headers.join(','),
-            ...orders.map(order => [
-                order.id,
-                `"${order.fullName}"`,
-                `"${order.city}"`,
-                order.phone,
-                `"${order.address}"`,
-                `"${order.product}"`,
-                order.quantity,
-                order.status,
-                order.timestamp
-            ].join(','))
-        ].join('\n');
-
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=orders.csv');
-        res.send(csvContent);
+        if (!order) {
+            return res.status(404).json({ 
+                error: 'Order not found' 
+            });
+        }
+        
+        res.json(order);
     } catch (error) {
-        console.error('Error exporting orders:', error);
-        res.status(500).json({ error: 'Erreur lors de l\'exportation des commandes' });
+        res.status(500).json({ 
+            error: 'Failed to fetch order' 
+        });
     }
 });
 
-// Initialize server
-async function startServer() {
-    await initializeOrdersFile();
-    app.listen(port, () => {
-        console.log(`Server running at http://localhost:${port}`);
-    });
-}
+// Update order status
+app.patch('/orders/:orderId', async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!status || !['pending', 'completed'].includes(status)) {
+            return res.status(400).json({ 
+                error: 'Invalid status' 
+            });
+        }
 
-startServer(); 
+        const orders = await readOrders();
+        const orderIndex = orders.orders.findIndex(o => o.orderId === req.params.orderId);
+        
+        if (orderIndex === -1) {
+            return res.status(404).json({ 
+                error: 'Order not found' 
+            });
+        }
+        
+        orders.orders[orderIndex].status = status;
+        await writeOrders(orders);
+        
+        res.json({ 
+            success: true, 
+            message: 'Order status updated' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            error: 'Failed to update order' 
+        });
+    }
+});
+
+// Delete order
+app.delete('/orders/:orderId', async (req, res) => {
+    try {
+        const orders = await readOrders();
+        const orderIndex = orders.orders.findIndex(o => o.orderId === req.params.orderId);
+        
+        if (orderIndex === -1) {
+            return res.status(404).json({ 
+                error: 'Order not found' 
+            });
+        }
+        
+        orders.orders.splice(orderIndex, 1);
+        await writeOrders(orders);
+        
+        res.json({ 
+            success: true, 
+            message: 'Order deleted successfully' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            error: 'Failed to delete order' 
+        });
+    }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ 
+        error: 'Something went wrong!' 
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+}); 
