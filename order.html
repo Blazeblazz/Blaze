@@ -417,6 +417,40 @@
         touch-action: manipulation;
       }
     }
+
+    /* Add error message styles */
+    .error-message {
+        color: #dc3545;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        text-align: center;
+        min-height: 1.2em;
+    }
+
+    /* Update button styles */
+    button[type="submit"] {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: var(--secondary-color);
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    button[type="submit"]:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
   </style>
 </head>
 <body>
@@ -465,23 +499,27 @@
       <!-- Order Form -->
       <div class="order-form">
         <h2 class="form-title">Informations de livraison</h2>
-        <form id="orderForm">
+        <form id="orderForm" onsubmit="submitOrder(event)">
           <div class="form-group">
-            <label for="name" class="form-label">Nom complet</label>
-            <input type="text" id="name" name="name" class="form-input" required>
+            <label for="name">Nom complet</label>
+            <input type="text" id="name" name="customerName" required>
           </div>
           <div class="form-group">
-            <label for="city" class="form-label">Ville</label>
-            <input type="text" id="city" name="city" class="form-input" required>
+            <label for="city">Ville</label>
+            <input type="text" id="city" name="city" required>
           </div>
           <div class="form-group">
-            <label for="phone" class="form-label">Numéro de téléphone</label>
-            <input type="tel" id="phone" name="phone" class="form-input" required>
+            <label for="phone">Téléphone</label>
+            <input type="tel" id="phone" name="phone" required>
           </div>
-          <button type="submit" class="submit-btn">Confirmer la commande</button>
-      </form>
+          <input type="hidden" name="productId" value="">
+          <input type="hidden" name="productName" value="">
+          <input type="hidden" name="productPrice" value="">
+          <div id="error-message" class="error-message"></div>
+          <button type="submit">Commander</button>
+        </form>
+      </div>
     </div>
-  </div>
   </main>
 
   <script>
@@ -501,42 +539,65 @@
     productImage.src = `images/products/${productName}/${productName.replace(/\s+/g, '-')}.webp`;
     productImage.alt = productName;
 
-      // Handle form submission
-    const orderForm = document.getElementById('orderForm');
-    orderForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // Get the base URL dynamically
+    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
 
-        const formData = {
-            productId,
-            productName,
-            productPrice,
-            customerName: document.getElementById('name').value,
-            city: document.getElementById('city').value,
-            phone: document.getElementById('phone').value
-        };
-
+    // Function to submit order
+    async function submitOrder(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const errorMessage = document.getElementById('error-message');
+        
         try {
-            const response = await fetch('/submit-order', {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Envoi en cours...';
+            errorMessage.textContent = '';
+            
+            const formData = new FormData(form);
+            const orderData = {
+                productId: formData.get('productId'),
+                productName: formData.get('productName'),
+                productPrice: formData.get('productPrice'),
+                customerName: formData.get('customerName'),
+                city: formData.get('city'),
+                phone: formData.get('phone')
+            };
+            
+            const response = await fetch(`${baseUrl}/submit-order`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(orderData)
             });
-
-            const result = await response.json();
             
-            if (result.success) {
-                alert('Commande confirmée! Numéro de commande: ' + result.orderId);
-                window.location.href = 'index.html';
-            } else {
-                throw new Error('Failed to submit order');
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Une erreur est survenue');
             }
+            
+            // Show success message
+            form.reset();
+            submitButton.textContent = 'Commande envoyée !';
+            submitButton.style.backgroundColor = '#4CAF50';
+            
+            // Redirect to success page after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+            
         } catch (error) {
             console.error('Error:', error);
-            alert('Une erreur est survenue. Veuillez réessayer.');
+            errorMessage.textContent = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+            submitButton.textContent = 'Commander';
+            submitButton.disabled = false;
         }
-    });
+    }
 
     // Mobile menu functionality
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
