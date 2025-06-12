@@ -8,9 +8,9 @@ const PORT = process.env.PORT || 3000;
 
 // Enable CORS for all routes with more permissive configuration
 app.use(cors({
-    origin: true, // Allow all origins
+    origin: '*', // Allow all origins for mobile
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
     preflightContinue: false,
     optionsSuccessStatus: 204
@@ -49,6 +49,11 @@ function writeOrders(orders) {
         return false;
     }
 }
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // API endpoint to handle order submission
 app.post('/api/orders', (req, res) => {

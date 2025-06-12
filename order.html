@@ -428,15 +428,19 @@
             submitBtn.textContent = 'Envoi en cours...';
 
             try {
+                // First check if server is available
+                const healthCheck = await fetch('http://localhost:3000/api/health');
+                if (!healthCheck.ok) {
+                    throw new Error('Le serveur n\'est pas disponible. Veuillez réessayer plus tard.');
+                }
+
                 const response = await fetch('http://localhost:3000/api/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(formData),
-                    mode: 'cors',
-                    credentials: 'include'
+                    body: JSON.stringify(formData)
                 });
 
                 if (!response.ok) {
