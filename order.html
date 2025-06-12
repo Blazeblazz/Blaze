@@ -465,7 +465,10 @@
       <!-- Order Form -->
       <div class="order-form">
         <h2 class="form-title">Informations de livraison</h2>
-        <form id="orderForm">
+        <form id="orderForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+          <input type="hidden" name="productId" id="productId">
+          <input type="hidden" name="productName" id="productName">
+          <input type="hidden" name="productPrice" id="productPrice">
           <div class="form-group">
             <label for="name" class="form-label">Nom complet</label>
             <input type="text" id="name" name="name" class="form-input" required>
@@ -479,9 +482,9 @@
             <input type="tel" id="phone" name="phone" class="form-input" required>
           </div>
           <button type="submit" class="submit-btn">Confirmer la commande</button>
-      </form>
+        </form>
+      </div>
     </div>
-  </div>
   </main>
 
   <script>
@@ -496,46 +499,22 @@
     document.getElementById('productPrice').textContent = `${productPrice} MAD`;
     document.getElementById('orderTotal').textContent = `${productPrice} MAD`;
 
+    // Set hidden form fields
+    document.getElementById('productId').value = productId;
+    document.getElementById('productName').value = productName;
+    document.getElementById('productPrice').value = productPrice;
+
     // Set product image
     const productImage = document.getElementById('productImage');
     productImage.src = `images/products/${productName}/${productName.replace(/\s+/g, '-')}.webp`;
     productImage.alt = productName;
 
-      // Handle form submission
+    // Handle form submission
     const orderForm = document.getElementById('orderForm');
-    orderForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formData = {
-            productId,
-            productName,
-            productPrice,
-            customerName: document.getElementById('name').value,
-            city: document.getElementById('city').value,
-            phone: document.getElementById('phone').value
-        };
-
-        try {
-            const response = await fetch('/submit-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                alert('Commande confirmée! Numéro de commande: ' + result.orderId);
-                window.location.href = 'index.html';
-            } else {
-                throw new Error('Failed to submit order');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Une erreur est survenue. Veuillez réessayer.');
-        }
+    orderForm.addEventListener('submit', (e) => {
+        // Form will be submitted to Formspree
+        // You'll receive the order details in your email
+        // And can view them in your Formspree dashboard
     });
 
     // Mobile menu functionality
