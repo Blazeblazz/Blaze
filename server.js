@@ -6,16 +6,19 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for all routes with more specific configuration
+// Enable CORS for all routes with more permissive configuration
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+    origin: true, // Allow all origins
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 }));
 
-// Parse JSON bodies
-app.use(express.json());
+// Parse JSON bodies with increased limit
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Function to read orders from file
 function readOrders() {
@@ -125,7 +128,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server with error handling
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
@@ -142,7 +145,7 @@ const server = app.listen(PORT, () => {
                         } else {
                             console.log(`Killed process ${pid} using port ${PORT}`);
                             // Try to start the server again
-                            server.listen(PORT);
+                            server.listen(PORT, '0.0.0.0');
                         }
                     });
                 }

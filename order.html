@@ -432,8 +432,10 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(formData),
+                    mode: 'cors',
                     credentials: 'include'
                 });
 
@@ -447,6 +449,7 @@
                 // Show success message
                 const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'block';
+                successMessage.textContent = data.message || 'Votre commande a été enregistrée avec succès!';
                 
                 // Reset form
                 document.getElementById('orderForm').reset();
