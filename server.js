@@ -1,163 +1,154 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
+const bodyParser = require('body-parser');
+const fs = require('fs').promises;
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for all routes with more permissive configuration
-app.use(cors({
-    origin: '*', // Allow all origins for mobile
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-}));
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
 
-// Parse JSON bodies with increased limit
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// File path for orders
+const ORDERS_FILE = path.join(__dirname, 'orders.json');
 
-// Function to read orders from file
-function readOrders() {
+// Initialize orders file if it doesn't exist
+async function initializeOrdersFile() {
     try {
-        if (fs.existsSync('orders.json')) {
-            console.log('Orders file exists');
-            const data = fs.readFileSync('orders.json', 'utf8');
-            return JSON.parse(data);
-        } else {
-            console.log('Creating new orders file');
-            fs.writeFileSync('orders.json', JSON.stringify([]));
-            return [];
-        }
+        await fs.access(ORDERS_FILE);
+        console.log('Orders file exists');
+    } catch {
+        console.log('Creating new orders file');
+        await fs.writeFile(ORDERS_FILE, JSON.stringify([], null, 2));
+    }
+}
+
+// Read orders from file
+async function readOrders() {
+    try {
+        const data = await fs.readFile(ORDERS_FILE, 'utf8');
+        return JSON.parse(data);
     } catch (error) {
         console.error('Error reading orders:', error);
         return [];
     }
 }
 
-// Function to write orders to file
-function writeOrders(orders) {
+// Write orders to file
+async function writeOrders(orders) {
     try {
-        fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
+        await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2));
         console.log('Orders written successfully');
-        return true;
     } catch (error) {
         console.error('Error writing orders:', error);
-        return false;
+        throw error;
     }
 }
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Validate order data
+function validateOrder(order) {
+    const errors = [];
 
-// API endpoint to handle order submission
-app.post('/api/orders', (req, res) => {
-    console.log('Received order request:', req.body);
+    if (!order.fullName || order.fullName.trim().length < 3) {
+        errors.push('Le nom complet est requis et doit contenir au moins 3 caractères');
+    }
 
+    if (!order.city || order.city.trim().length === 0) {
+        errors.push('La ville est requise');
+    }
+
+    const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
+    if (!order.phone || !phoneRegex.test(order.phone)) {
+        errors.push('Le numéro de téléphone doit être au format marocain valide');
+    }
+
+    return errors;
+}
+
+// API Routes
+app.post('/api/orders', async (req, res) => {
     try {
-        // Validate required fields
-        const { fullName, city, phone, productId, productName, productPrice, productImage } = req.body;
+        console.log('Received order request:', req.body);
+        const order = req.body;
         
-        if (!fullName || !city || !phone || !productId || !productName || !productPrice) {
-            console.log('Validation error: Missing required fields');
+        // Validate order data
+        const errors = validateOrder(order);
+        if (errors.length > 0) {
+            console.log('Validation errors:', errors);
             return res.status(400).json({ 
                 success: false, 
-                message: 'Tous les champs sont requis' 
+                message: 'Validation failed', 
+                errors 
             });
         }
 
-        // Validate phone number format (Moroccan format)
-        const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
-        if (!phoneRegex.test(phone)) {
-            console.log('Validation error: Invalid phone number format');
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Numéro de téléphone invalide' 
-            });
-        }
-
-        // Read existing orders
-        const orders = readOrders();
-
-        // Create new order
-        const newOrder = {
+        // Add timestamp and status
+        const orderWithMetadata = {
+            ...order,
             id: Date.now().toString(),
-            fullName,
-            city,
-            phone,
-            productId,
-            productName,
-            productPrice,
-            productImage,
             timestamp: new Date().toISOString(),
             status: 'pending'
         };
 
-        console.log('Processing order:', newOrder);
+        console.log('Processing order:', orderWithMetadata);
 
-        // Add new order to array
-        orders.push(newOrder);
+        // Read existing orders
+        const orders = await readOrders();
+        
+        // Add new order
+        orders.push(orderWithMetadata);
+        
+        // Save updated orders
+        await writeOrders(orders);
 
-        // Write updated orders back to file
-        if (writeOrders(orders)) {
-            console.log('Order saved successfully');
-            res.json({ 
-                success: true, 
-                message: 'Commande enregistrée avec succès',
-                orderId: newOrder.id
-            });
-        } else {
-            throw new Error('Failed to save order');
-        }
+        console.log('Order saved successfully');
+        res.status(201).json({
+            success: true,
+            message: 'Order created successfully',
+            orderId: orderWithMetadata.id
+        });
     } catch (error) {
-        console.error('Server error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Une erreur est survenue lors du traitement de votre commande' 
+        console.error('Error creating order:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+});
+
+// Get all orders (for future admin dashboard)
+app.get('/api/orders', async (req, res) => {
+    try {
+        const orders = await readOrders();
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
         });
     }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Global error:', err);
-    res.status(500).json({ 
-        success: false, 
-        message: 'Une erreur est survenue sur le serveur' 
+    console.error('Server error:', err);
+    res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: err.message
     });
 });
 
-// Start server with error handling
-const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
-}).on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use. Trying to kill the process...`);
-        // Try to kill the process using the port
-        require('child_process').exec(`netstat -ano | findstr :${PORT}`, (error, stdout) => {
-            if (stdout) {
-                const pid = stdout.split(' ').filter(Boolean).pop();
-                if (pid) {
-                    require('child_process').exec(`taskkill /F /PID ${pid}`, (err) => {
-                        if (err) {
-                            console.error('Failed to kill process:', err);
-                            process.exit(1);
-                        } else {
-                            console.log(`Killed process ${pid} using port ${PORT}`);
-                            // Try to start the server again
-                            server.listen(PORT, '0.0.0.0');
-                        }
-                    });
-                }
-            }
-        });
-    } else {
-        console.error('Server error:', err);
-        process.exit(1);
-    }
+// Initialize orders file and start server
+initializeOrdersFile().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}).catch(error => {
+    console.error('Failed to start server:', error);
 }); 

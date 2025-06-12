@@ -99,7 +99,7 @@
 
         .order-summary {
             background: white;
-            padding: 2.5rem;
+            padding: 1.5rem;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
             position: sticky;
@@ -190,24 +190,27 @@
         }
 
         .product-details {
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
             position: relative;
             width: 100%;
             overflow: hidden;
-            border-radius: 12px;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+            padding: 1rem;
         }
 
         .product-image {
             width: 100%;
-            height: 400px;
+            height: 200px;
             object-fit: cover;
             object-position: center;
             display: block;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
             transition: transform 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .product-image:hover {
@@ -215,43 +218,107 @@
         }
 
         .product-name {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             color: var(--text-color);
+            text-align: center;
         }
 
         .product-price {
-            font-size: 2rem;
+            font-size: 1.5rem;
             color: var(--primary-color);
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
         }
 
         .summary-title {
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
             color: var(--text-color);
             font-weight: 600;
+            text-align: center;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+
+        .summary-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .summary-section {
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
 
         .summary-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid var(--border-color);
-            font-size: 1.1rem;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .summary-item-label {
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .summary-item-value {
+            font-weight: 600;
         }
 
         .summary-total {
             display: flex;
             justify-content: space-between;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
+            padding: 1rem;
             border-top: 2px solid var(--border-color);
             font-weight: 600;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .delivery-info {
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .delivery-info h3 {
+            font-size: 1rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .delivery-info p {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .footer {
@@ -289,7 +356,7 @@
             }
 
             .product-image {
-                height: 300px;
+                height: 180px;
             }
 
             .form-title {
@@ -297,11 +364,16 @@
             }
 
             .product-name {
-                font-size: 1.25rem;
+                font-size: 1rem;
             }
 
             .product-price {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
+            }
+
+            .summary-total {
+                font-size: 1.1rem;
+                padding: 0.75rem;
             }
         }
     </style>
@@ -358,17 +430,25 @@
                     <p id="productPrice" class="product-price"></p>
                 </div>
 
-                <div class="summary-item">
-                    <span>Sous-total</span>
-                    <span id="subtotal"></span>
+                <div class="summary-section">
+                    <div class="summary-item">
+                        <span class="summary-item-label">Sous-total</span>
+                        <span class="summary-item-value" id="subtotal"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-item-label">Livraison</span>
+                        <span class="summary-item-value">Gratuite</span>
+                    </div>
                 </div>
-                <div class="summary-item">
-                    <span>Livraison</span>
-                    <span>Gratuite</span>
-                </div>
+
                 <div class="summary-total">
                     <span>Total</span>
                     <span id="total"></span>
+                </div>
+
+                <div class="delivery-info">
+                    <h3>Livraison à domicile</h3>
+                    <p>Livraison gratuite partout au Maroc. Délai de livraison estimé: 2-3 jours ouvrables.</p>
                 </div>
             </div>
         </div>
@@ -421,72 +501,35 @@
                 return;
             }
 
-            // Disable submit button and show loading state
-            const submitBtn = document.querySelector('.submit-btn');
-            const originalBtnText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Envoi en cours...';
-
             try {
-                // First check if server is available
-                const healthCheck = await fetch('http://localhost:3000/api/health');
-                if (!healthCheck.ok) {
-                    throw new Error('Le serveur n\'est pas disponible. Veuillez réessayer plus tard.');
-                }
-
                 const response = await fetch('http://localhost:3000/api/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });
 
-                if (!response.ok) {
-                    const data = await response.json();
-                    throw new Error(data.message || 'Une erreur est survenue');
-                }
-
                 const data = await response.json();
 
-                // Show success message
-                const successMessage = document.getElementById('successMessage');
-                successMessage.style.display = 'block';
-                successMessage.textContent = data.message || 'Votre commande a été enregistrée avec succès!';
-                
-                // Reset form
-                document.getElementById('orderForm').reset();
-                
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 5000);
+                if (response.ok) {
+                    // Show success message
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('orderForm').reset();
+                    
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                } else {
+                    throw new Error(data.message || 'Une erreur est survenue');
+                }
             } catch (error) {
                 console.error('Error:', error);
-                // Show error message
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'error-message';
-                errorMessage.style.display = 'block';
-                errorMessage.textContent = error.message || 'Une erreur est survenue lors de l\'envoi de votre commande. Veuillez réessayer.';
-                document.getElementById('orderForm').insertBefore(errorMessage, submitBtn);
-
-                // Add retry button
-                const retryBtn = document.createElement('button');
-                retryBtn.type = 'button';
-                retryBtn.className = 'submit-btn';
-                retryBtn.style.marginTop = '1rem';
-                retryBtn.textContent = 'Réessayer';
-                retryBtn.onclick = () => {
-                    errorMessage.remove();
-                    retryBtn.remove();
-                    document.getElementById('orderForm').dispatchEvent(new Event('submit'));
-                };
-                document.getElementById('orderForm').insertBefore(retryBtn, submitBtn);
-            } finally {
-                // Re-enable submit button and restore original text
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalBtnText;
+                alert('Une erreur est survenue lors de l\'envoi de votre commande. Veuillez réessayer.');
             }
         });
     </script>
