@@ -20,12 +20,12 @@ const validateOrder = (req, res, next) => {
         });
     }
 
-    // Validate phone number (Moroccan format)
-    const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
+    // Validate phone number (more flexible format)
+    const phoneRegex = /^(?:(?:\+|00)212|0)?[5-7]\d{8}$/;
     if (!phoneRegex.test(phone)) {
         return res.status(400).json({ 
             success: false, 
-            error: 'Invalid phone number format' 
+            error: 'Format de numéro de téléphone invalide. Utilisez un numéro marocain valide (ex: 0612345678)' 
         });
     }
 
@@ -174,76 +174,6 @@ app.delete('/orders/:orderId', async (req, res) => {
         res.status(500).json({ 
             error: 'Failed to delete order' 
         });
-    }
-});
-
-// Product Management
-const productsFile = path.join(__dirname, 'products.json');
-
-// Initialize products.json if it doesn't exist
-if (!fs.existsSync(productsFile)) {
-    fs.writeFileSync(productsFile, JSON.stringify([]));
-}
-
-// Get all products
-app.get('/api/products', (req, res) => {
-    try {
-        const products = JSON.parse(fs.readFileSync(productsFile));
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ error: 'Error reading products' });
-    }
-});
-
-// Add new product
-app.post('/api/products', (req, res) => {
-    try {
-        const products = JSON.parse(fs.readFileSync(productsFile));
-        const newProduct = {
-            id: Date.now().toString(),
-            ...req.body,
-            createdAt: new Date().toISOString()
-        };
-        products.push(newProduct);
-        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
-        res.status(201).json(newProduct);
-    } catch (error) {
-        res.status(500).json({ error: 'Error adding product' });
-    }
-});
-
-// Update product
-app.put('/api/products/:id', (req, res) => {
-    try {
-        const products = JSON.parse(fs.readFileSync(productsFile));
-        const index = products.findIndex(p => p.id === req.params.id);
-        if (index === -1) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-        products[index] = {
-            ...products[index],
-            ...req.body,
-            updatedAt: new Date().toISOString()
-        };
-        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
-        res.json(products[index]);
-    } catch (error) {
-        res.status(500).json({ error: 'Error updating product' });
-    }
-});
-
-// Delete product
-app.delete('/api/products/:id', (req, res) => {
-    try {
-        const products = JSON.parse(fs.readFileSync(productsFile));
-        const filteredProducts = products.filter(p => p.id !== req.params.id);
-        if (filteredProducts.length === products.length) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-        fs.writeFileSync(productsFile, JSON.stringify(filteredProducts, null, 2));
-        res.json({ message: 'Product deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Error deleting product' });
     }
 });
 
