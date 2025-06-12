@@ -421,6 +421,12 @@
                 return;
             }
 
+            // Disable submit button and show loading state
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Envoi en cours...';
+
             try {
                 const response = await fetch('http://localhost:3000/api/orders', {
                     method: 'POST',
@@ -449,7 +455,16 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Une erreur est survenue lors de l\'envoi de votre commande. Veuillez réessayer.');
+                // Show error message
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'error-message';
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = error.message || 'Une erreur est survenue lors de l\'envoi de votre commande. Veuillez réessayer.';
+                document.getElementById('orderForm').insertBefore(errorMessage, submitBtn);
+            } finally {
+                // Re-enable submit button and restore original text
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
             }
         });
     </script>

@@ -10,5 +10,17 @@
     "id": "1749740901755",
     "timestamp": "2025-06-12T15:08:21.755Z",
     "status": "pending"
+  },
+  {
+    "fullName": "Abderrahim Anegmar",
+    "city": "Casablanca",
+    "phone": "0676922783",
+    "productId": "1",
+    "productName": "Lost in Casablanca",
+    "productPrice": "129",
+    "productImage": "images/products/Lost in Casablanca/Lost-in-casablanca.webp",
+    "id": "1749742095588",
+    "timestamp": "2025-06-12T15:28:15.588Z",
+    "status": "pending"
   }
 ]
