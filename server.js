@@ -16,7 +16,7 @@ const validateOrder = (req, res, next) => {
     if (!productId || !productName || !productPrice || !customerName || !city || !phone) {
         return res.status(400).json({ 
             success: false, 
-            error: 'Missing required fields' 
+            error: 'Veuillez remplir tous les champs obligatoires' 
         });
     }
 
@@ -25,7 +25,7 @@ const validateOrder = (req, res, next) => {
     if (!phoneRegex.test(phone)) {
         return res.status(400).json({ 
             success: false, 
-            error: 'Format de numéro de téléphone invalide. Exemple: 0612345678 ou +212612345678' 
+            error: 'Format de numéro de téléphone invalide. Exemple: 0612345678 ou +33612345678' 
         });
     }
 
@@ -33,7 +33,7 @@ const validateOrder = (req, res, next) => {
     if (isNaN(productPrice) || Number(productPrice) <= 0) {
         return res.status(400).json({ 
             success: false, 
-            error: 'Invalid price' 
+            error: 'Prix invalide' 
         });
     }
 
