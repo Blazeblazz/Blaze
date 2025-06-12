@@ -964,6 +964,20 @@
         }, 5000);
       }
     });
+
+    // Add to cart functionality
+    const addToCartBtn = document.querySelector('.add-to-cart');
+    addToCartBtn.addEventListener('click', () => {
+        // Redirect to order form with product information
+        const productInfo = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image
+        };
+        const queryString = new URLSearchParams(productInfo).toString();
+        window.location.href = `order.html?${queryString}`;
+    });
   </script>
 </body>
 </html> 
