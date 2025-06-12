@@ -16,7 +16,7 @@ const validateOrder = (req, res, next) => {
     if (!productId || !productName || !productPrice || !customerName || !city || !phone) {
         return res.status(400).json({ 
             success: false, 
-            error: 'Veuillez remplir tous les champs obligatoires' 
+            error: 'Veuillez remplir tous les champs requis' 
         });
     }
 
