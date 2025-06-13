@@ -138,35 +138,47 @@ async function sendOrderNotification(order) {
 // API Routes
 app.post('/api/orders', async (req, res) => {
     try {
-        console.log('Received order request:', req.body);
         const { name, phone, city, productId, productName, productPrice, productImage } = req.body;
-        
+
         // Validate required fields
         if (!name || !phone || !city || !productId || !productName || !productPrice) {
-            console.log('Missing required fields');
-            return res.status(400).json({ 
-                error: 'Champs requis manquants',
+            return res.status(400).json({
+                error: 'Missing required fields',
                 details: 'Veuillez remplir tous les champs obligatoires'
             });
         }
 
-        // Validate phone number (Moroccan format)
+        // Validate phone number format
         const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
         if (!phoneRegex.test(phone)) {
-            console.log('Invalid phone number format');
-            return res.status(400).json({ 
-                error: 'Format de numéro de téléphone invalide',
+            return res.status(400).json({
+                error: 'Invalid phone number',
                 details: 'Veuillez entrer un numéro de téléphone marocain valide'
             });
         }
 
-        const orders = await readOrders();
-        
-        const newOrder = {
+        // Validate name length
+        if (name.trim().length < 3) {
+            return res.status(400).json({
+                error: 'Invalid name',
+                details: 'Le nom doit contenir au moins 3 caractères'
+            });
+        }
+
+        // Validate city length
+        if (city.trim().length < 2) {
+            return res.status(400).json({
+                error: 'Invalid city',
+                details: 'La ville doit contenir au moins 2 caractères'
+            });
+        }
+
+        // Create order object
+        const order = {
             id: Date.now().toString(),
-            name,
-            phone,
-            city,
+            name: name.trim(),
+            phone: phone.trim(),
+            city: city.trim(),
             productId,
             productName,
             productPrice,
@@ -175,34 +187,70 @@ app.post('/api/orders', async (req, res) => {
             createdAt: new Date().toISOString()
         };
 
-        orders.push(newOrder);
-        await writeOrders(orders);
-        console.log('Order saved successfully:', newOrder.id);
+        // Read existing orders
+        let orders = [];
+        try {
+            const ordersData = await fs.readFile(ORDERS_FILE, 'utf8');
+            orders = JSON.parse(ordersData);
+        } catch (error) {
+            // If file doesn't exist or is empty, start with empty array
+            orders = [];
+        }
+
+        // Add new order
+        orders.push(order);
+
+        // Save orders
+        await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2));
 
         // Send email notification
-        await sendOrderNotification(newOrder);
+        try {
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: process.env.EMAIL_USER,
+                subject: 'Nouvelle commande reçue',
+                html: `
+                    <h2>Nouvelle commande reçue</h2>
+                    <p><strong>ID:</strong> ${order.id}</p>
+                    <p><strong>Nom:</strong> ${order.name}</p>
+                    <p><strong>Téléphone:</strong> ${order.phone}</p>
+                    <p><strong>Ville:</strong> ${order.city}</p>
+                    <p><strong>Produit:</strong> ${order.productName}</p>
+                    <p><strong>Prix:</strong> ${order.productPrice} MAD</p>
+                    <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString('fr-FR')}</p>
+                `
+            };
 
-        res.status(201).json(newOrder);
+            await transporter.sendMail(mailOptions);
+            console.log('Order notification email sent successfully');
+        } catch (emailError) {
+            console.error('Error sending order notification email:', emailError);
+            // Don't fail the order if email fails
+        }
+
+        res.status(201).json({
+            message: 'Order created successfully',
+            order
+        });
     } catch (error) {
         console.error('Error creating order:', error);
-        res.status(500).json({ 
-            error: 'Erreur lors de la création de la commande',
-            details: error.message 
+        res.status(500).json({
+            error: 'Internal server error',
+            details: 'Une erreur est survenue lors de la création de la commande'
         });
     }
 });
 
 app.get('/api/orders', async (req, res) => {
     try {
-        console.log('Fetching orders...');
-        const orders = await readOrders();
-        console.log(`Found ${orders.length} orders`);
+        const ordersData = await fs.readFile(ORDERS_FILE, 'utf8');
+        const orders = JSON.parse(ordersData);
         res.json(orders);
     } catch (error) {
-        console.error('Error fetching orders:', error);
-        res.status(500).json({ 
-            error: 'Erreur lors du chargement des commandes',
-            details: error.message 
+        console.error('Error reading orders:', error);
+        res.status(500).json({
+            error: 'Internal server error',
+            details: 'Une erreur est survenue lors de la lecture des commandes'
         });
     }
 });
@@ -213,37 +261,37 @@ app.patch('/api/orders/:id', async (req, res) => {
         const { status } = req.body;
 
         if (!status || !['pending', 'processing', 'completed', 'cancelled'].includes(status)) {
-            return res.status(400).json({ 
-                error: 'Statut invalide',
-                details: 'Le statut doit être pending, processing, completed ou cancelled'
+            return res.status(400).json({
+                error: 'Invalid status',
+                details: 'Statut invalide'
             });
         }
 
-        const orders = await readOrders();
-        const orderIndex = orders.findIndex(order => order.id === id);
+        const ordersData = await fs.readFile(ORDERS_FILE, 'utf8');
+        const orders = JSON.parse(ordersData);
 
+        const orderIndex = orders.findIndex(order => order.id === id);
         if (orderIndex === -1) {
-            return res.status(404).json({ 
-                error: 'Commande non trouvée',
-                details: `Aucune commande trouvée avec l'ID ${id}`
+            return res.status(404).json({
+                error: 'Order not found',
+                details: 'Commande non trouvée'
             });
         }
 
         orders[orderIndex].status = status;
         orders[orderIndex].updatedAt = new Date().toISOString();
 
-        await writeOrders(orders);
-        console.log(`Order ${id} status updated to ${status}`);
+        await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2));
 
-        // Send status update notification
-        await sendOrderNotification(orders[orderIndex]);
-
-        res.json(orders[orderIndex]);
+        res.json({
+            message: 'Order status updated successfully',
+            order: orders[orderIndex]
+        });
     } catch (error) {
         console.error('Error updating order:', error);
-        res.status(500).json({ 
-            error: 'Erreur lors de la mise à jour de la commande',
-            details: error.message 
+        res.status(500).json({
+            error: 'Internal server error',
+            details: 'Une erreur est survenue lors de la mise à jour de la commande'
         });
     }
 });

@@ -121,7 +121,8 @@
     }
 
         .form-group {
-            margin-bottom: 2rem;
+            position: relative;
+            margin-bottom: 1.5rem;
     }
 
         .form-group label {
@@ -135,7 +136,7 @@
         .form-group input {
             width: 100%;
             padding: 1rem;
-            border: 1px solid var(--border-color);
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1rem;
             transition: all 0.3s ease;
@@ -146,16 +147,16 @@
             outline: none;
             border-color: var(--primary-color);
             background-color: white;
-            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
         .submit-btn {
             background-color: var(--primary-color);
             color: white;
-            padding: 1.2rem 2rem;
+            padding: 1rem;
             border: none;
       border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
             width: 100%;
@@ -171,12 +172,13 @@
         .error-message {
             color: #dc3545;
             font-size: 0.875rem;
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
             display: none;
         }
 
         .form-group.error input {
             border-color: #dc3545;
+            background-color: #fff8f8;
         }
 
         .form-group.error .error-message {
@@ -185,6 +187,17 @@
 
         .form-group.success input {
             border-color: #28a745;
+            background-color: #f8fff8;
+        }
+
+        .success-message {
+            display: none;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
         }
 
         .loading {
@@ -198,11 +211,11 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid var(--primary-color);
+            width: 24px;
+            height: 24px;
+            margin: -12px 0 0 -12px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -210,26 +223,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        .success-message {
-            display: none;
-            background-color: #d4edda;
-            color: #155724;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .error-message-container {
-            display: none;
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            text-align: center;
         }
 
         .product-details {
@@ -382,7 +375,8 @@
     @media (max-width: 768px) {
             .order-layout {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.5rem;
+        padding: 1rem;
       }
 
             .container {
@@ -391,7 +385,7 @@
 
             .order-form,
             .order-summary {
-                padding: 1.5rem;
+                padding: 1.25rem;
       }
 
             .order-summary {
@@ -399,7 +393,8 @@
             }
 
             .product-image {
-                height: 180px;
+                height: 200px;
+                object-fit: cover;
             }
 
             .form-title {
@@ -503,36 +498,37 @@
     </footer>
 
   <script>
-        // Get product details from URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    const productName = urlParams.get('name');
-    const productPrice = urlParams.get('price');
-        const productImage = urlParams.get('image');
-
-        // Update product details in the summary
-        document.getElementById('productImage').src = productImage || 'images/placeholder.webp';
-        document.getElementById('productName').textContent = productName || 'Produit';
-        document.getElementById('productPrice').textContent = productPrice ? `${productPrice} MAD` : '0 MAD';
-        document.getElementById('subtotal').textContent = productPrice ? `${productPrice} MAD` : '0 MAD';
-        document.getElementById('total').textContent = productPrice ? `${productPrice} MAD` : '0 MAD';
-
-        // Form validation and handling
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('orderForm');
             const formError = document.getElementById('formError');
             const formSuccess = document.getElementById('formSuccess');
+            
+            // Get product details from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            const productName = urlParams.get('name');
+            const productPrice = urlParams.get('price');
+            const productImage = urlParams.get('image');
 
-            // Phone number validation for Moroccan format
+            // Update order summary
+            document.getElementById('productImage').src = productImage;
+            document.getElementById('productName').textContent = productName;
+            document.getElementById('productPrice').textContent = `${productPrice} MAD`;
+            document.getElementById('subtotal').textContent = `${productPrice} MAD`;
+            document.getElementById('total').textContent = `${productPrice} MAD`;
+
+            // Phone number validation
             function isValidPhone(phone) {
                 const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
                 return phoneRegex.test(phone);
             }
 
-            // Real-time validation
+            // Real-time validation with debounce
+            let validationTimeout;
             form.querySelectorAll('input').forEach(input => {
                 input.addEventListener('input', function() {
-                    validateField(this);
+                    clearTimeout(validationTimeout);
+                    validationTimeout = setTimeout(() => validateField(this), 300);
                 });
 
                 input.addEventListener('blur', function() {
@@ -544,7 +540,6 @@
                 const errorElement = document.getElementById(field.id + 'Error');
                 const formGroup = field.closest('.form-group');
                 
-                // Remove existing classes
                 formGroup.classList.remove('error', 'success');
                 
                 if (field.value.trim() === '') {
@@ -552,8 +547,17 @@
                     return false;
                 }
 
-                // Specific validation for phone
                 if (field.id === 'phone' && !isValidPhone(field.value)) {
+                    formGroup.classList.add('error');
+                    return false;
+                }
+
+                if (field.id === 'name' && field.value.trim().length < 3) {
+                    formGroup.classList.add('error');
+                    return false;
+                }
+
+                if (field.id === 'city' && field.value.trim().length < 2) {
                     formGroup.classList.add('error');
                     return false;
                 }
@@ -564,13 +568,11 @@
 
             // Form submission
             form.addEventListener('submit', async function(e) {
-        e.preventDefault();
+                e.preventDefault();
 
-                // Reset messages
                 formError.style.display = 'none';
                 formSuccess.style.display = 'none';
                 
-                // Validate all fields
                 let isValid = true;
                 form.querySelectorAll('input').forEach(input => {
                     if (!validateField(input)) {
@@ -584,7 +586,6 @@
                     return;
                 }
 
-                // Add loading state
                 form.classList.add('loading');
                 const submitButton = form.querySelector('button[type="submit"]');
                 submitButton.disabled = true;
@@ -601,7 +602,7 @@
                     };
 
                     const response = await fetch('http://localhost:3000/api/orders', {
-          method: 'POST',
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -609,29 +610,30 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error('Failed to submit order');
+                        const errorData = await response.json();
+                        throw new Error(errorData.details || 'Failed to submit order');
                     }
 
-                    // Show success message
                     formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
                     formSuccess.style.display = 'block';
                     
-                    // Reset form
                     form.reset();
                     form.querySelectorAll('.form-group').forEach(group => {
                         group.classList.remove('success');
                     });
-      } catch (error) {
+
+                    // Scroll to success message
+                    formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } catch (error) {
                     console.error('Error submitting order:', error);
-                    formError.textContent = 'Une erreur est survenue. Veuillez réessayer.';
+                    formError.textContent = error.message || 'Une erreur est survenue. Veuillez réessayer.';
                     formError.style.display = 'block';
                 } finally {
-                    // Remove loading state
                     form.classList.remove('loading');
                     submitButton.disabled = false;
                 }
             });
-    });
+        });
   </script>
 </body>
 </html> 
