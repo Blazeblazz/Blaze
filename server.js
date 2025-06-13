@@ -9,10 +9,15 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://blazeblazz.github.io', 'https://blaze-giveaway.onrender.com'],
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: ['http://localhost:3000', 'https://blazeblazz.github.io', 'https://blaze-giveaway.onrender.com', 'https://blazeblazz.github.io/Blaze'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true
 }));
+
+// Add preflight handler
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.static('public'));
 

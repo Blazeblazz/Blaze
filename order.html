@@ -606,17 +606,22 @@
                         ? 'http://localhost:3000/api/orders'
                         : 'https://blaze-giveaway.onrender.com/api/orders';
 
+                    console.log('Sending request to:', apiUrl); // Debug log
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify(orderData)
                     });
 
+                    console.log('Response status:', response.status); // Debug log
+                    const responseData = await response.json();
+                    console.log('Response data:', responseData); // Debug log
+
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.details || 'Failed to submit order');
+                        throw new Error(responseData.details || 'Failed to submit order');
                     }
 
                     formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
