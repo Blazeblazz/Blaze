@@ -9,7 +9,8 @@
     "productImage": "images/products/Red Rug/Red-Rug.webp",
     "id": "1749740901755",
     "timestamp": "2025-06-12T15:08:21.755Z",
-    "status": "pending"
+    "status": "cancelled",
+    "updatedAt": "2025-06-13T00:42:57.292Z"
   },
   {
     "fullName": "Abderrahim Anegmar",
@@ -21,6 +22,111 @@
     "productImage": "images/products/Lost in Casablanca/Lost-in-casablanca.webp",
     "id": "1749742095588",
     "timestamp": "2025-06-12T15:28:15.588Z",
-    "status": "pending"
+    "status": "completed",
+    "updatedAt": "2025-06-13T00:43:02.471Z"
+  },
+  {
+    "id": "1749776379346",
+    "name": "Oufiane",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "1",
+    "productName": "Lost in Casablanca",
+    "productPrice": "129",
+    "productImage": "images/products/Lost in Casablanca/Lost-in-casablanca.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T00:59:39.346Z",
+    "updatedAt": "2025-06-13T01:01:52.189Z"
+  },
+  {
+    "id": "1749776499967",
+    "name": "Soufiane",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "3",
+    "productName": "Turtle Rush",
+    "productPrice": "129",
+    "productImage": "images/products/Turtle Rush/Turtle-Rush.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T01:01:39.967Z",
+    "updatedAt": "2025-06-13T01:01:53.063Z"
+  },
+  {
+    "id": "1749776725880",
+    "name": "Soufiane Lahmaid",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "4",
+    "productName": "Whispering Wildflowers",
+    "productPrice": "129",
+    "productImage": "images/products/Whispering Wildflowers/Whispering-Wildflowers.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T01:05:25.880Z",
+    "updatedAt": "2025-06-13T01:06:07.308Z"
+  },
+  {
+    "id": "1749777070097",
+    "name": "Soufiane Lahmaid",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "2",
+    "productName": "Red Rug",
+    "productPrice": "129",
+    "productImage": "images/products/Red Rug/Red-Rug.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T01:11:10.097Z",
+    "updatedAt": "2025-06-13T01:11:27.487Z"
+  },
+  {
+    "id": "1749777387839",
+    "name": "Soufiane Lahmaid",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "2",
+    "productName": "Red Rug",
+    "productPrice": "129",
+    "productImage": "images/products/Red Rug/Red-Rug.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T01:16:27.839Z",
+    "updatedAt": "2025-06-13T01:26:14.957Z"
+  },
+  {
+    "id": "1749777489473",
+    "name": "Soufiane Lahmaid",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "3",
+    "productName": "Turtle Rush",
+    "productPrice": "129",
+    "productImage": "images/products/Turtle Rush/Turtle-Rush.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T01:18:09.473Z",
+    "updatedAt": "2025-06-13T01:26:17.842Z"
+  },
+  {
+    "id": "1749777720075",
+    "name": "Soufiane Lahmaid",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "2",
+    "productName": "Red Rug",
+    "productPrice": "129",
+    "productImage": "images/products/Red Rug/Red-Rug.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T01:22:00.075Z",
+    "updatedAt": "2025-06-13T01:26:18.616Z"
+  },
+  {
+    "id": "1749777899271",
+    "name": "Soufiane Lahmaid",
+    "phone": "0637921431",
+    "city": "Casablanca",
+    "productId": "2",
+    "productName": "Red Rug",
+    "productPrice": "129",
+    "productImage": "images/products/Red Rug/Red-Rug.webp",
+    "status": "cancelled",
+    "createdAt": "2025-06-13T01:24:59.271Z",
+    "updatedAt": "2025-06-13T01:26:19.279Z"
   }
 ]

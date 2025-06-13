@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Gestion des Commandes</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --text-color: #2c3e50;
+            --border-color: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f6fa;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .orders-table {
+            width: 100%;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .orders-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .orders-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .orders-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-processing {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .button-completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .button-cancelled {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .product-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .refresh-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .refresh-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem;
+            }
+
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">Gestion des Commandes</h1>
+            <button class="refresh-button" onclick="loadOrders()">Actualiser</button>
+        </div>
+
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalOrders">0</div>
+                <div class="stat-label">Total des Commandes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingOrders">0</div>
+                <div class="stat-label">Commandes en Attente</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedOrders">0</div>
+                <div class="stat-label">Commandes Complétées</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="cancelledOrders">0</div>
+                <div class="stat-label">Commandes Annulées</div>
+            </div>
+        </div>
+
+        <div class="orders-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produit</th>
+                        <th>Client</th>
+                        <th>Téléphone</th>
+                        <th>Ville</th>
+                        <th>Prix</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <!-- Orders will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/orders`);
+                const orders = await response.json();
+                
+                updateStats(orders);
+                updateOrdersTable(orders);
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                alert('Erreur lors du chargement des commandes');
+            }
+        }
+
+        function updateStats(orders) {
+            const stats = {
+                total: orders.length,
+                pending: orders.filter(order => order.status === 'pending').length,
+                completed: orders.filter(order => order.status === 'completed').length,
+                cancelled: orders.filter(order => order.status === 'cancelled').length
+            };
+
+            document.getElementById('totalOrders').textContent = stats.total;
+            document.getElementById('pendingOrders').textContent = stats.pending;
+            document.getElementById('completedOrders').textContent = stats.completed;
+            document.getElementById('cancelledOrders').textContent = stats.cancelled;
+        }
+
+        function updateOrdersTable(orders) {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+
+            orders.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>
+                        <img src="${order.productImage}" alt="${order.productName}" class="product-image">
+                        ${order.productName}
+                    </td>
+                    <td>${order.name}</td>
+                    <td>${order.phone}</td>
+                    <td>${order.city}</td>
+                    <td>${order.productPrice} MAD</td>
+                    <td>
+                        <span class="status-badge status-${order.status}">
+                            ${getStatusLabel(order.status)}
+                        </span>
+                    </td>
+                    <td>
+                        ${getActionButtons(order)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'pending': 'En attente',
+                'processing': 'En cours',
+                'completed': 'Complétée',
+                'cancelled': 'Annulée'
+            };
+            return labels[status] || status;
+        }
+
+        function getActionButtons(order) {
+            if (order.status === 'completed' || order.status === 'cancelled') {
+                return '';
+            }
+
+            const buttons = [];
+            
+            if (order.status === 'pending') {
+                buttons.push(`
+                    <button class="action-button button-processing" 
+                            onclick="updateOrderStatus('${order.id}', 'processing')">
+                        En cours
+                    </button>
+                `);
+            }
+            
+            if (order.status === 'processing') {
+                buttons.push(`
+                    <button class="action-button button-completed" 
+                            onclick="updateOrderStatus('${order.id}', 'completed')">
+                        Compléter
+                    </button>
+                `);
+            }
+            
+            buttons.push(`
+                <button class="action-button button-cancelled" 
+                        onclick="updateOrderStatus('${order.id}', 'cancelled')">
+                    Annuler
+                </button>
+            `);
+
+            return buttons.join('');
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update order status');
+                }
+
+                loadOrders();
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                alert('Erreur lors de la mise à jour du statut');
+            }
+        }
+
+        // Load orders when page loads
+        loadOrders();
+
+        // Refresh orders every 30 seconds
+        setInterval(loadOrders, 30000);
+    </script>
+</body>
+</html> 
