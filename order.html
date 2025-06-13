@@ -503,6 +503,9 @@
     </footer>
 
   <script>
+        // API URL configuration
+        const API_URL = 'https://blaze-production.up.railway.app';
+
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
     
@@ -601,8 +604,8 @@
                         productImage: productImage
                     };
 
-                    const response = await fetch('/api/orders', {
-          method: 'POST',
+                    const response = await fetch(`${API_URL}/api/orders`, {
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
