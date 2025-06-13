@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: ['https://blazeblazz.github.io', 'http://localhost:3000'],
+    origin: ['https://blazeblazz.github.io', 'http://localhost:3000', 'https://blazeblazz.github.io/Blaze'],
     methods: ['GET', 'POST', 'PATCH'],
     credentials: true
 }));
