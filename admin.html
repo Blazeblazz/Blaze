@@ -188,78 +188,6 @@
             background-color: var(--secondary-color);
         }
 
-        .search-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .filter-select {
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
-            min-width: 150px;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-        }
-
-        .pagination-button {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .pagination-button:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .pagination-button.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .pagination-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .sort-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.5rem;
-            color: var(--secondary-color);
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .sort-button:hover {
-            color: var(--primary-color);
-        }
-
-        .sort-icon {
-            font-size: 0.875rem;
-        }
-
         @media (max-width: 768px) {
             .admin-container {
                 padding: 1rem;
@@ -284,17 +212,7 @@
     <div class="admin-container">
         <div class="admin-header">
             <h1 class="admin-title">Gestion des Commandes</h1>
-            <div class="search-bar">
-                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une commande...">
-                <select id="statusFilter" class="filter-select">
-                    <option value="">Tous les statuts</option>
-                    <option value="pending">En attente</option>
-                    <option value="processing">En cours</option>
-                    <option value="completed">Complétées</option>
-                    <option value="cancelled">Annulées</option>
-                </select>
-                <button class="refresh-button" onclick="loadOrders()">Actualiser</button>
-            </div>
+            <button class="refresh-button" onclick="loadOrders()">Actualiser</button>
         </div>
 
         <div class="admin-stats">
@@ -320,38 +238,13 @@
             <table>
                 <thead>
                     <tr>
-                        <th>
-                            ID
-                            <button class="sort-button" onclick="sortOrders('id')">
-                                <span class="sort-icon">↕</span>
-                            </button>
-                        </th>
+                        <th>ID</th>
                         <th>Produit</th>
-                        <th>
-                            Client
-                            <button class="sort-button" onclick="sortOrders('name')">
-                                <span class="sort-icon">↕</span>
-                            </button>
-                        </th>
+                        <th>Client</th>
                         <th>Téléphone</th>
-                        <th>
-                            Ville
-                            <button class="sort-button" onclick="sortOrders('city')">
-                                <span class="sort-icon">↕</span>
-                            </button>
-                        </th>
-                        <th>
-                            Prix
-                            <button class="sort-button" onclick="sortOrders('productPrice')">
-                                <span class="sort-icon">↕</span>
-                            </button>
-                        </th>
-                        <th>
-                            Statut
-                            <button class="sort-button" onclick="sortOrders('status')">
-                                <span class="sort-icon">↕</span>
-                            </button>
-                        </th>
+                        <th>Ville</th>
+                        <th>Prix</th>
+                        <th>Statut</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -360,48 +253,18 @@
                 </tbody>
             </table>
         </div>
-
-        <div class="pagination" id="pagination">
-            <!-- Pagination buttons will be inserted here -->
-        </div>
     </div>
 
     <script>
         const API_URL = 'http://localhost:3000/api';
-        let currentPage = 1;
-        let currentSort = '';
-        let sortDirection = 'asc';
 
-        // Debounce function for search
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Load orders with filters
         async function loadOrders() {
             try {
-                const searchQuery = document.getElementById('searchInput').value;
-                const statusFilter = document.getElementById('statusFilter').value;
+                const response = await fetch(`${API_URL}/orders`);
+                const orders = await response.json();
                 
-                let url = `${API_URL}/orders?page=${currentPage}&limit=10`;
-                if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
-                if (statusFilter) url += `&status=${statusFilter}`;
-                if (currentSort) url += `&sort=${currentSort}:${sortDirection}`;
-
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                updateStats(data.orders);
-                updateOrdersTable(data.orders);
-                updatePagination(data.total, data.totalPages);
+                updateStats(orders);
+                updateOrdersTable(orders);
             } catch (error) {
                 console.error('Error loading orders:', error);
                 alert('Erreur lors du chargement des commandes');
@@ -516,72 +379,6 @@
                 alert('Erreur lors de la mise à jour du statut');
             }
         }
-
-        // Sort orders
-        function sortOrders(field) {
-            if (currentSort === field) {
-                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort = field;
-                sortDirection = 'asc';
-            }
-            loadOrders();
-        }
-
-        // Update pagination
-        function updatePagination(total, totalPages) {
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-
-            // Previous button
-            const prevButton = document.createElement('button');
-            prevButton.className = 'pagination-button';
-            prevButton.textContent = '←';
-            prevButton.disabled = currentPage === 1;
-            prevButton.onclick = () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    loadOrders();
-                }
-            };
-            pagination.appendChild(prevButton);
-
-            // Page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
-                pageButton.textContent = i;
-                pageButton.onclick = () => {
-                    currentPage = i;
-                    loadOrders();
-                };
-                pagination.appendChild(pageButton);
-            }
-
-            // Next button
-            const nextButton = document.createElement('button');
-            nextButton.className = 'pagination-button';
-            nextButton.textContent = '→';
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.onclick = () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    loadOrders();
-                }
-            };
-            pagination.appendChild(nextButton);
-        }
-
-        // Event listeners for search and filter
-        document.getElementById('searchInput').addEventListener('input', debounce(() => {
-            currentPage = 1;
-            loadOrders();
-        }, 300));
-
-        document.getElementById('statusFilter').addEventListener('change', () => {
-            currentPage = 1;
-            loadOrders();
-        });
 
         // Load orders when page loads
         loadOrders();
