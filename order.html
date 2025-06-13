@@ -503,11 +503,12 @@
     </footer>
 
   <script>
-        // Get product details from URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    const productName = urlParams.get('name');
-    const productPrice = urlParams.get('price');
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+    
+        const productId = urlParams.get('id');
+        const productName = urlParams.get('name');
+        const productPrice = urlParams.get('price');
         const productImage = urlParams.get('image');
 
         // Update product details in the summary
