@@ -640,20 +640,6 @@
                     console.error('Error submitting order:', error);
                     formError.textContent = 'Une erreur est survenue lors de la commande. Veuillez réessayer.';
                     formError.style.display = 'block';
-                }
-            });
-        });
-    </script>
-</body>
-</html>
-            });
-        });
-    });
-  </script>
-</body>
-</html>
-                } catch (error) {
-                    console.error('Error submitting order:', error);
                     let errorMessage = error.message || 'Une erreur est survenue lors de la commande.';
                     
                     // Add specific mobile error handling
@@ -665,7 +651,6 @@
                     
                     formError.textContent = errorMessage;
                     formError.style.display = 'block';
-                }
                 } finally {
                     form.classList.remove('loading');
                     submitButton.disabled = false;
@@ -674,4 +659,4 @@
         });
   </script>
 </body>
-</html> 
+</html>
