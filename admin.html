@@ -65,13 +65,6 @@
             flex: 1;
         }
 
-        .admin-dashboard {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
         .orders-table {
             width: 100%;
             border-collapse: collapse;
@@ -86,108 +79,107 @@
         }
 
         .orders-table th {
-            background-color: var(--background-color);
-            font-weight: 600;
-        }
-
-        .orders-table tr:hover {
-            background-color: #f8f9fa;
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .order-status {
-            padding: 0.25rem 0.75rem;
+            padding: 0.5rem 1rem;
             border-radius: 4px;
-            font-size: 0.875rem;
             font-weight: 500;
         }
 
-        .status-pending {
-            background-color: #ffe5e5;
-            color: #dc3545;
+        .order-status.pending {
+            background-color: #ffc107;
+            color: #000;
         }
 
-        .status-confirmed {
-            background-color: #e8f5e9;
-            color: #28a745;
+        .order-status.processing {
+            background-color: #17a2b8;
+            color: white;
         }
 
-        .status-delivered {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .action-button {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: background-color 0.2s;
-        }
-
-        .confirm-button {
+        .order-status.completed {
             background-color: var(--success-color);
             color: white;
         }
 
-        .delete-button {
+        .order-status.cancelled {
             background-color: var(--danger-color);
             color: white;
         }
 
-        .confirm-button:hover {
-            background-color: #218838;
+        .actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
-        .delete-button:hover {
-            background-color: #c82333;
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--secondary-color);
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
         }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
         }
 
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        .btn:hover {
+            opacity: 0.9;
         }
 
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .stat-label {
-            color: var(--secondary-color);
-            font-size: 0.875rem;
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-            .orders-table {
-                display: block;
-                overflow-x: auto;
-            }
+        .error-message,
+        .success-message {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .error-message {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .success-message {
+            background-color: var(--success-color);
+            color: white;
         }
     </style>
 </head>
@@ -195,154 +187,177 @@
     <header class="header">
         <nav class="nav">
             <a href="index.html" class="logo">BLAZE</a>
-            <div class="nav-actions">
-                <a href="index.html" class="nav-link">Retour au site</a>
-            </div>
+            <span class="nav-item">Panneau d'Administration</span>
         </nav>
     </header>
 
-    <main class="container">
-        <div class="admin-dashboard">
-            <h1>Administration des Commandes</h1>
-            
-            <div class="stats">
-                <div class="stat-card" id="totalOrders">
-                    <div class="stat-value">0</div>
-                    <div class="stat-label">Total des commandes</div>
-                </div>
-                <div class="stat-card" id="pendingOrders">
-                    <div class="stat-value">0</div>
-                    <div class="stat-label">En attente</div>
-                </div>
-                <div class="stat-card" id="confirmedOrders">
-                    <div class="stat-value">0</div>
-                    <div class="stat-label">Confirmées</div>
-                </div>
-                <div class="stat-card" id="deliveredOrders">
-                    <div class="stat-value">0</div>
-                    <div class="stat-label">Livré</div>
-                </div>
-            </div>
+    <div class="container">
+        <h1>Commandes</h1>
+        
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
 
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Client</th>
-                        <th>Téléphone</th>
-                        <th>Produit</th>
-                        <th>Prix</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="ordersList">
-                </tbody>
-            </table>
-        </div>
-    </main>
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Client</th>
+                    <th>Téléphone</th>
+                    <th>Ville</th>
+                    <th>Produit</th>
+                    <th>Prix</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+        </table>
+    </div>
+
+    <div class="loading" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
 
     <script>
-        // Load orders from localStorage
-        function loadOrders() {
-            return JSON.parse(localStorage.getItem('orders') || '[]');
+        const apiUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api/orders'
+            : 'https://blaze-giveaway.onrender.com/api/orders';
+
+        const ordersBody = document.getElementById('ordersBody');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // Show loading overlay
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
         }
 
-        // Save orders to localStorage
-        function saveOrders(orders) {
-            localStorage.setItem('orders', JSON.stringify(orders));
-            updateStats();
-            renderOrders();
+        // Hide loading overlay
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
         }
 
-        // Update statistics
-        function updateStats() {
-            const orders = loadOrders();
-            const total = orders.length;
-            const pending = orders.filter(o => o.status === 'pending').length;
-            const confirmed = orders.filter(o => o.status === 'confirmed').length;
-            const delivered = orders.filter(o => o.status === 'delivered').length;
-
-            document.getElementById('totalOrders').querySelector('.stat-value').textContent = total;
-            document.getElementById('pendingOrders').querySelector('.stat-value').textContent = pending;
-            document.getElementById('confirmedOrders').querySelector('.stat-value').textContent = confirmed;
-            document.getElementById('deliveredOrders').querySelector('.stat-value').textContent = delivered;
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
         }
 
-        // Render orders table
-        function renderOrders() {
-            const orders = loadOrders();
-            const ordersList = document.getElementById('ordersList');
-            ordersList.innerHTML = '';
+        // Show success message
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
 
-            if (orders.length === 0) {
-                ordersList.innerHTML = '<tr><td colspan="8" class="empty-state">Aucune commande pour le moment</td></tr>';
-                return;
-            }
-
-            orders.forEach(order => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${order.id}</td>
-                    <td>${order.name}</td>
-                    <td>${order.phone}</td>
-                    <td>${order.productName}</td>
-                    <td>${order.productPrice} MAD</td>
-                    <td>
-                        <span class="order-status status-${order.status}">${order.status}</span>
-                    </td>
-                    <td>${new Date(order.createdAt).toLocaleString()}</td>
-                    <td class="action-buttons">
-                        <button class="action-button confirm-button" onclick="updateOrderStatus('${order.id}', 'confirmed')">
-                            Confirmer
-                        </button>
-                        <button class="action-button delete-button" onclick="deleteOrder('${order.id}')">
-                            Supprimer
-                        </button>
-                    </td>
-                `;
-                ordersList.appendChild(row);
+        // Format date
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
 
         // Update order status
-        function updateOrderStatus(orderId, newStatus) {
-            const orders = loadOrders();
-            const order = orders.find(o => o.id === parseInt(orderId));
-            
-            if (order) {
-                order.status = newStatus;
-                saveOrders(orders);
+        async function updateOrderStatus(orderId, status) {
+            try {
+                showLoading();
+                const response = await fetch(`${apiUrl}/${orderId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update order status');
+                }
+
+                showSuccess('Statut mis à jour avec succès');
+                await loadOrders();
+            } catch (error) {
+                showError('Erreur lors de la mise à jour du statut');
+            } finally {
+                hideLoading();
             }
         }
 
         // Delete order
-        function deleteOrder(orderId) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
-                const orders = loadOrders();
-                const updatedOrders = orders.filter(o => o.id !== parseInt(orderId));
-                saveOrders(updatedOrders);
+        async function deleteOrder(orderId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+                return;
+            }
+
+            try {
+                showLoading();
+                const response = await fetch(`${apiUrl}/${orderId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete order');
+                }
+
+                showSuccess('Commande supprimée avec succès');
+                await loadOrders();
+            } catch (error) {
+                showError('Erreur lors de la suppression de la commande');
+            } finally {
+                hideLoading();
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Admin page loaded');
-            
-            // Debug localStorage
-            const storedOrders = localStorage.getItem('orders');
-            console.log('Stored orders:', storedOrders);
-            
-            if (!storedOrders) {
-                console.log('No orders found in localStorage');
-            } else {
-                console.log('Orders found:', JSON.parse(storedOrders));
+        // Load orders
+        async function loadOrders() {
+            try {
+                showLoading();
+                const response = await fetch(apiUrl);
+                const orders = await response.json();
+
+                ordersBody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${order.name}</td>
+                        <td>${order.phone}</td>
+                        <td>${order.city}</td>
+                        <td>${order.productName}</td>
+                        <td>${order.productPrice}€</td>
+                        <td>${formatDate(order.createdAt)}</td>
+                        <td>
+                            <span class="order-status ${order.status.toLowerCase()}">
+                                ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <button class="btn btn-primary" onclick="updateOrderStatus(${order.id}, 'completed')">
+                                Terminé
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteOrder(${order.id})">
+                                Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showError('Erreur lors du chargement des commandes');
+            } finally {
+                hideLoading();
             }
-            
-            updateStats();
-            renderOrders();
-        });
+        }
+
+        // Load orders when page loads
+        document.addEventListener('DOMContentLoaded', loadOrders);
     </script>
 </body>
 </html>
