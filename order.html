@@ -621,7 +621,10 @@
                     console.log('Response data:', responseData); // Debug log
 
                     if (!response.ok) {
-                        throw new Error(responseData.details || 'Failed to submit order');
+                        const errorMessage = responseData.details || 
+                            'Une erreur est survenue lors de la commande. ' +
+                            'Code: ' + response.status + ' - ' + response.statusText;
+                        throw new Error(errorMessage);
                     }
 
                     formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
@@ -636,8 +639,18 @@
                     formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } catch (error) {
                     console.error('Error submitting order:', error);
-                    formError.textContent = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+                    let errorMessage = error.message || 'Une erreur est survenue lors de la commande.';
+                    
+                    // Add specific mobile error handling
+                    if (error.message?.includes('Failed to load resource')) {
+                        errorMessage += ' Vérifiez votre connexion internet et réessayez.';
+                    } else if (error.message?.includes('CORS')) {
+                        errorMessage += ' Une erreur de configuration du serveur est survenue. Contactez l\'admin pour résoudre le problème.';
+                    }
+                    
+                    formError.textContent = errorMessage;
                     formError.style.display = 'block';
+                }
                 } finally {
                     form.classList.remove('loading');
                     submitButton.disabled = false;
