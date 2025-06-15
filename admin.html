@@ -258,17 +258,45 @@
     <script>
         const API_URL = 'http://localhost:3000/api';
 
+        // Load orders with polling
         async function loadOrders() {
             try {
-                const response = await fetch(`${API_URL}/orders`);
+                const response = await fetch('api/orders');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const orders = await response.json();
-                
                 updateStats(orders);
                 updateOrdersTable(orders);
+                return orders;
             } catch (error) {
                 console.error('Error loading orders:', error);
-                alert('Erreur lors du chargement des commandes');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = 'Erreur lors du chargement des commandes. Veuillez réessayer.';
+                document.querySelector('.admin-container').prepend(errorDiv);
+                return [];
             }
+        }
+
+        // Start polling for orders
+        async function startPolling() {
+            try {
+                const orders = await loadOrders();
+                if (orders.length > 0) {
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'success-message';
+                    successDiv.textContent = 'Commandes chargées avec succès.';
+                    document.querySelector('.admin-container').prepend(successDiv);
+                    setTimeout(() => successDiv.remove(), 3000);
+                }
+            } catch (error) {
+                console.error('Error in polling:', error);
+            }
+            
+            // Schedule next poll
+            setTimeout(startPolling, 30000); // Poll every 30 seconds
         }
 
         function updateStats(orders) {
@@ -359,30 +387,63 @@
             return buttons.join('');
         }
 
+        // Update order status with retry
         async function updateOrderStatus(orderId, newStatus) {
-            try {
-                const response = await fetch(`${API_URL}/orders/${orderId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
+            const MAX_RETRIES = 3;
+            const RETRY_DELAY = 5000; // 5 seconds
 
-                if (!response.ok) {
-                    throw new Error('Failed to update order status');
+            async function updateWithRetry(retryCount = 0) {
+                try {
+                    const response = await fetch(`api/orders/${orderId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    loadOrders();
+                    
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'success-message';
+                    successDiv.textContent = 'Statut de la commande mis à jour avec succès.';
+                    document.querySelector('.admin-container').prepend(successDiv);
+                    setTimeout(() => successDiv.remove(), 3000);
+                    
+                    return data;
+                } catch (error) {
+                    console.error(`Error updating order status (attempt ${retryCount + 1}):`, error);
+                    
+                    if (retryCount < MAX_RETRIES - 1) {
+                        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                        return updateWithRetry(retryCount + 1);
+                    }
+                    
+                    // Show error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message';
+                    errorDiv.textContent = 'Erreur lors de la mise à jour du statut. Veuillez réessayer.';
+                    document.querySelector('.admin-container').prepend(errorDiv);
+                    setTimeout(() => errorDiv.remove(), 5000);
+                    
+                    throw error;
                 }
-
-                loadOrders();
-            } catch (error) {
-                console.error('Error updating order status:', error);
-                alert('Erreur lors de la mise à jour du statut');
             }
+
+            return updateWithRetry();
         }
 
         // Load orders when page loads
         loadOrders();
 
+        // Start polling
+        startPolling();
         // Refresh orders every 30 seconds
         setInterval(loadOrders, 30000);
     </script>
