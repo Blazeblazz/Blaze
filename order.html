@@ -601,26 +601,36 @@
                         productImage: productImage
                     };
 
-                    // Use the production API URL
-                    const apiUrl = window.location.hostname === 'localhost' 
-                        ? 'http://localhost:3000/api/orders'
-                        : 'https://blaze-giveaway.onrender.com/api/orders';
+                    // Show success message locally
+                    formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
+                    formSuccess.style.display = 'block';
+                    
+                    // Store order locally for demo purposes
+                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    orders.push(orderData);
+                    localStorage.setItem('orders', JSON.stringify(orders));
 
-                    console.log('Sending request to:', apiUrl); // Debug log
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(orderData)
+                    // Show success message
+                    formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
+                    formSuccess.style.display = 'block';
+                    
+                    // Reset form
+                    form.reset();
+                    form.querySelectorAll('.form-group').forEach(group => {
+                        group.classList.remove('success');
                     });
 
-                    console.log('Response status:', response.status); // Debug log
-                    const responseData = await response.json();
-                    console.log('Response data:', responseData); // Debug log
-
-                    if (!response.ok) {
+                    // Scroll to success message
+                    formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } catch (error) {
+                    console.error('Error submitting order:', error);
+                    let errorMessage = error.message || 'Une erreur est survenue lors de la commande.';
+                    formError.textContent = errorMessage;
+                    formError.style.display = 'block';
+                } finally {
+                    form.classList.remove('loading');
+                    submitButton.disabled = false;
+                }
                         const errorMessage = responseData.details || 
                             'Une erreur est survenue lors de la commande. ' +
                             'Code: ' + response.status + ' - ' + response.statusText;
