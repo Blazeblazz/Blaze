@@ -605,9 +605,15 @@
                     formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
                     formSuccess.style.display = 'block';
                     
-                    // Store order locally for demo purposes
+                    // Store order locally with initial status
                     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                    orders.push(orderData);
+                    const newOrder = {
+                        ...orderData,
+                        id: Date.now(),
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                    };
+                    orders.push(newOrder);
                     localStorage.setItem('orders', JSON.stringify(orders));
 
                     // Show success message

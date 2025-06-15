@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - BLAZE</title>
+    <link rel="icon" type="image/webp" href="images/Favicon/FAVICON.webp">
+    <style>
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #333333;
+            --text-color: #000000;
+            --background-color: #FFFFFF;
+            --border-color: #CCCCCC;
+            --hover-color: #333333;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: var(--background-color);
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .admin-dashboard {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .orders-table th {
+            background-color: var(--background-color);
+            font-weight: 600;
+        }
+
+        .orders-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .order-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #ffe5e5;
+            color: #dc3545;
+        }
+
+        .status-confirmed {
+            background-color: #e8f5e9;
+            color: #28a745;
+        }
+
+        .status-delivered {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-button {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .confirm-button {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .delete-button {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background-color: #218838;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="index.html" class="logo">BLAZE</a>
+            <div class="nav-actions">
+                <a href="index.html" class="nav-link">Retour au site</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="admin-dashboard">
+            <h1>Administration des Commandes</h1>
+            
+            <div class="stats">
+                <div class="stat-card" id="totalOrders">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Total des commandes</div>
+                </div>
+                <div class="stat-card" id="pendingOrders">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">En attente</div>
+                </div>
+                <div class="stat-card" id="confirmedOrders">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Confirmées</div>
+                </div>
+                <div class="stat-card" id="deliveredOrders">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Livré</div>
+                </div>
+            </div>
+
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Client</th>
+                        <th>Téléphone</th>
+                        <th>Produit</th>
+                        <th>Prix</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersList">
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Load orders from localStorage
+        function loadOrders() {
+            return JSON.parse(localStorage.getItem('orders') || '[]');
+        }
+
+        // Save orders to localStorage
+        function saveOrders(orders) {
+            localStorage.setItem('orders', JSON.stringify(orders));
+            updateStats();
+            renderOrders();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const orders = loadOrders();
+            const total = orders.length;
+            const pending = orders.filter(o => o.status === 'pending').length;
+            const confirmed = orders.filter(o => o.status === 'confirmed').length;
+            const delivered = orders.filter(o => o.status === 'delivered').length;
+
+            document.getElementById('totalOrders').querySelector('.stat-value').textContent = total;
+            document.getElementById('pendingOrders').querySelector('.stat-value').textContent = pending;
+            document.getElementById('confirmedOrders').querySelector('.stat-value').textContent = confirmed;
+            document.getElementById('deliveredOrders').querySelector('.stat-value').textContent = delivered;
+        }
+
+        // Render orders table
+        function renderOrders() {
+            const orders = loadOrders();
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = '';
+
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<tr><td colspan="8" class="empty-state">Aucune commande pour le moment</td></tr>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.name}</td>
+                    <td>${order.phone}</td>
+                    <td>${order.productName}</td>
+                    <td>${order.productPrice} MAD</td>
+                    <td>
+                        <span class="order-status status-${order.status}">${order.status}</span>
+                    </td>
+                    <td>${new Date(order.createdAt).toLocaleString()}</td>
+                    <td class="action-buttons">
+                        <button class="action-button confirm-button" onclick="updateOrderStatus('${order.id}', 'confirmed')">
+                            Confirmer
+                        </button>
+                        <button class="action-button delete-button" onclick="deleteOrder('${order.id}')">
+                            Supprimer
+                        </button>
+                    </td>
+                `;
+                ordersList.appendChild(row);
+            });
+        }
+
+        // Update order status
+        function updateOrderStatus(orderId, newStatus) {
+            const orders = loadOrders();
+            const order = orders.find(o => o.id === parseInt(orderId));
+            
+            if (order) {
+                order.status = newStatus;
+                saveOrders(orders);
+            }
+        }
+
+        // Delete order
+        function deleteOrder(orderId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+                const orders = loadOrders();
+                const updatedOrders = orders.filter(o => o.id !== parseInt(orderId));
+                saveOrders(updatedOrders);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
+            renderOrders();
+        });
+    </script>
+</body>
+</html>
