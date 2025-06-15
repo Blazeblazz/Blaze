@@ -840,6 +840,137 @@
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
+    // Product data
+    const products = [
+      {
+        id: 1,
+        name: 'Lost in Casablanca',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Lost in Casablanca/Lost-in-casablanca.webp',
+        sizes: ['XS', 'S', 'M', 'L', 'XL']
+      },
+      {
+        id: 2,
+        name: 'Red Rug',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Red Rug/Red-Rug.webp',
+        sizes: ['XS', 'S', 'M', 'L', 'XL']
+      },
+      {
+        id: 3,
+        name: 'Turtle Rush',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Turtle Rush/Turtle-Rush.webp',
+        sizes: ['XS', 'S', 'M', 'L', 'XL']
+      },
+      {
+        id: 4,
+        name: 'Whispering Wildflowers',
+        price: 129,
+        compareAtPrice: 179,
+        image: 'images/products/Whispering Wildflowers/Whispering-Wildflowers.webp',
+        sizes: ['XS', 'S', 'M', 'L', 'XL']
+      }
+    ];
+
+    // Get product details
+    const product = products.find(p => p.id === parseInt(productId));
+    if (!product) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // DOM Elements
+    const productImage = document.getElementById('productImage');
+    const productName = document.getElementById('productName');
+    const productPrice = document.getElementById('productPrice');
+    const sizeOptions = document.getElementById('sizeOptions');
+    const orderForm = document.getElementById('orderForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const successMessage = document.getElementById('successMessage');
+
+    // Update product details
+    if (productImage) productImage.src = product.image;
+    if (productName) productName.textContent = product.name;
+    if (productPrice) productPrice.textContent = `${product.price} MAD`;
+
+    // Add size options
+    if (sizeOptions) {
+      product.sizes.forEach(size => {
+        const option = document.createElement('div');
+        option.className = 'size-option';
+        option.textContent = size;
+        option.onclick = () => selectSize(size);
+        sizeOptions.appendChild(option);
+      });
+    }
+
+    let selectedSize = null;
+
+    function selectSize(size) {
+      selectedSize = size;
+      document.querySelectorAll('.size-option').forEach(option => {
+        option.classList.toggle('selected', option.textContent === size);
+      });
+    }
+
+    // Order form handling
+    if (orderForm) {
+      orderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Show loading state
+        loadingOverlay.style.display = 'flex';
+        orderForm.style.display = 'none';
+
+        try {
+          const formData = new FormData(orderForm);
+          const orderData = {
+            id: Date.now(),
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            city: formData.get('city'),
+            size: selectedSize,
+            productName: product.name,
+            productPrice: product.price,
+            createdAt: new Date().toISOString(),
+            status: 'pending'
+          };
+
+          // Send order to server
+          const response = await fetch('http://localhost:3000/api/orders', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to place order');
+          }
+
+          // Show success message
+          successMessage.style.display = 'flex';
+          loadingOverlay.style.display = 'none';
+
+          // Reset form after 3 seconds
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 3000);
+
+        } catch (error) {
+          console.error('Order error:', error);
+          loadingOverlay.style.display = 'none';
+          orderForm.style.display = 'block';
+          alert('Échec de la commande. Veuillez réessayer.');
+        }
+      });
+    }
+
     // Product data (same as in index.html)
     const products = [
       {
@@ -979,5 +1110,180 @@
         window.location.href = `order.html?${queryString}`;
     });
   </script>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" style="display: none;">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p>Commande en cours...</p>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div id="successMessage" style="display: none;">
+    <div class="success-content">
+      <h3>Commande passée avec succès !</h3>
+      <p>Merci pour votre achat. Nous vous contacterons bientôt pour confirmer votre commande.</p>
+      <button onclick="window.location.href='index.html'">CONTINUER LES ACHATS</button>
+    </div>
+  </div>
+
+  <style>
+    /* Loading Overlay */
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .loading-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Success Message */
+    #successMessage {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .success-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .success-content h3 {
+      color: #2ecc71;
+      margin-bottom: 1rem;
+    }
+
+    .success-content button {
+      background: #2ecc71;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .success-content button:hover {
+      background: #27ae60;
+    }
+
+    /* Form Styles */
+    #orderForm {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .size-option {
+      padding: 0.8rem 1.5rem;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 1rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+
+    .size-option:hover {
+      border-color: #3498db;
+    }
+
+    .size-option.selected {
+      background: #3498db;
+      color: white;
+      border-color: #3498db;
+    }
+
+    .submit-btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: background 0.3s;
+    }
+
+    .submit-btn:hover {
+      background: #2980b9;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      #orderForm {
+        padding: 1.5rem;
+      }
+
+      .size-option {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
 </body>
 </html> 
