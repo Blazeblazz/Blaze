@@ -43,14 +43,6 @@ app.use(express.static('public'));
 
 // Orders file path
 const ORDERS_FILE = path.join(__dirname, 'orders.json');
-const BACKUP_ORDERS_FILE = path.join(__dirname, 'orders_backup.json');
-
-// Create orders.json if it doesn't exist
-try {
-    await fs.access(ORDERS_FILE);
-} catch (error) {
-    await fs.writeFile(ORDERS_FILE, '[]');
-}
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -87,74 +79,121 @@ async function initializeOrdersFile() {
     }
 }
 
-// Read orders with backup
+// Initialize orders file when server starts
+initializeOrdersFile().catch(console.error);
+
+// Order route handler
+app.post('/api/orders', async (req, res) => {
+    try {
+        const { name, phone, city, productId, productName, productPrice, productImage } = req.body;
+        
+        if (!name || !phone || !city || !productId || !productName || !productPrice) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Read existing orders
+        const orders = await readOrders();
+        
+        // Create new order
+        const newOrder = {
+            id: Date.now(),
+            name,
+            phone,
+            city,
+            productId,
+            productName,
+            productPrice,
+            productImage,
+            status: 'pending',
+            createdAt: new Date().toISOString()
+        };
+
+        // Add new order
+        orders.push(newOrder);
+        
+        // Save orders
+        await writeOrders(orders);
+        
+        // Send email notification
+        await sendOrderNotification(newOrder);
+        
+        res.status(201).json({ message: 'Order created successfully', order: newOrder });
+        
+    } catch (error) {
+        console.error('Error processing order:', error);
+        res.status(500).json({ error: 'Failed to process order' });
+    }
+});
+
+// Get all orders (for admin)
+app.get('/api/orders', async (req, res) => {
+    try {
+        const orders = await readOrders();
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+});
+
+// Get single order by ID (for admin)
+app.get('/api/orders/:id', async (req, res) => {
+    try {
+        const orders = await readOrders();
+        const order = orders.find(o => o.id === parseInt(req.params.id));
+        
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        res.json(order);
+    } catch (error) {
+        console.error('Error fetching order:', error);
+        res.status(500).json({ error: 'Failed to fetch order' });
+    }
+});
+
+// Update order status (for admin)
+app.patch('/api/orders/:id', async (req, res) => {
+    try {
+        const orders = await readOrders();
+        const order = orders.find(o => o.id === parseInt(req.params.id));
+        
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        // Update order status
+        order.status = req.body.status || order.status;
+        
+        // Save updated orders
+        await writeOrders(orders);
+        
+        res.json({ message: 'Order updated successfully', order });
+    } catch (error) {
+        console.error('Error updating order:', error);
+        res.status(500).json({ error: 'Failed to update order' });
+    }
+});
+
+// Read orders
 async function readOrders() {
     try {
         const data = await fs.readFile(ORDERS_FILE, 'utf8');
-        const orders = JSON.parse(data);
-        // Create backup if it doesn't exist
-        try {
-            await fs.access(BACKUP_ORDERS_FILE);
-        } catch (error) {
-            await fs.writeFile(BACKUP_ORDERS_FILE, data);
-        }
-        return orders;
+        return JSON.parse(data);
     } catch (error) {
         console.error('Error reading orders:', error);
-        // Try to restore from backup if available
-        try {
-            const backupData = await fs.readFile(BACKUP_ORDERS_FILE, 'utf8');
-            const orders = JSON.parse(backupData);
-            await fs.writeFile(ORDERS_FILE, backupData);
-            return orders;
-        } catch (backupError) {
-            console.error('Error restoring from backup:', backupError);
-            return [];
-        }
+        return [];
     }
 }
 
-// Write orders with backup
+// Write orders
 async function writeOrders(orders) {
     try {
-        const data = JSON.stringify(orders, null, 2);
-        // Write to backup first
-        await fs.writeFile(BACKUP_ORDERS_FILE, data);
-        // Then write to main file
-        await fs.writeFile(ORDERS_FILE, data);
-        return true;
+        await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2));
+        console.log('Orders written successfully');
     } catch (error) {
         console.error('Error writing orders:', error);
-        return false;
-    }
-}
-
-// Update order status
-async function updateOrderStatus(orderId, newStatus) {
-    try {
-        const orders = await readOrders();
-        const orderIndex = orders.findIndex(order => order.id === orderId);
-        if (orderIndex === -1) {
-            throw new Error('Order not found');
-        }
-
-        const updatedOrder = {
-            ...orders[orderIndex],
-            status: newStatus,
-            updatedAt: new Date().toISOString()
-        };
-
-        orders[orderIndex] = updatedOrder;
-        const success = await writeOrders(orders);
-        
-        if (success) {
-            // Send email notification for status change
-            await sendOrderNotification(updatedOrder);
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.error('Error updating order status:', error);
         throw error;
     }
 }
@@ -170,64 +209,41 @@ async function sendOrderNotification(order) {
         return;
     }
 
-    const MAX_RETRIES = 3;
-    const RETRY_DELAY = 5000; // 5 seconds
-
-    async function sendWithRetry(retryCount = 0) {
-        try {
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: process.env.ADMIN_EMAIL,
-                subject: `Commande mise à jour - ${order.productName}`,
-                text: `Mise à jour de commande:\n\n` +
-                      `Nom: ${order.name}\n` +
-                      `Téléphone: ${order.phone}\n` +
-                      `Ville: ${order.city}\n` +
-                      `Produit: ${order.productName}\n` +
-                      `Prix: ${order.productPrice}€\n` +
-                      `ID de commande: ${order.id}\n` +
-                      `Status: ${order.status}\n` +
-                      `Date: ${new Date(order.timestamp).toLocaleString()}\n` +
-                      `Dernière mise à jour: ${new Date(order.updatedAt).toLocaleString()}`,
-                html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-                        Commande mise à jour
-                    </h2>
-                    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-                        <p><strong>Informations du client:</strong></p>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li>Nom: ${order.name}</li>
-                            <li>Téléphone: ${order.phone}</li>
-                            <li>Ville: ${order.city}</li>
-                        </ul>
-                        <p><strong>Produit:</strong></p>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li>Nom: ${order.productName}</li>
-                            <li>Prix: ${order.productPrice}€</li>
-                        </ul>
-                        <p><strong>Détails de la commande:</strong></p>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li>ID: ${order.id}</li>
-                            <li>Status: ${order.status}</li>
-                            <li>Date: ${new Date(order.timestamp).toLocaleString()}</li>
-                            <li>Dernière mise à jour: ${new Date(order.updatedAt).toLocaleString()}</li>
-                        </ul>
-                    </div>
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: process.env.ADMIN_EMAIL,
+        subject: 'Nouvelle Commande - Giveaway',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+                    Nouvelle Commande Reçue
+                </h2>
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <p><strong>ID:</strong> ${order.id}</p>
+                    <p><strong>Client:</strong> ${order.name}</p>
+                    <p><strong>Téléphone:</strong> ${order.phone}</p>
+                    <p><strong>Ville:</strong> ${order.city}</p>
+                    <p><strong>Produit:</strong> ${order.productName}</p>
+                    <p><strong>Prix:</strong> ${order.productPrice} MAD</p>
+                    <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+                    <p><strong>Statut:</strong> ${order.status}</p>
                 </div>
-                `,
-            };
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="https://blaze-giveaway.onrender.com/admin.html" 
+                       style="background-color: #3498db; color: white; padding: 10px 20px; 
+                              text-decoration: none; border-radius: 5px;">
+                        Voir dans le panneau d'administration
+                    </a>
+                </div>
+            </div>
+        `
+    };
 
-            await transporter.sendMail(mailOptions);
-            console.log('Email notification sent successfully');
-            return true;
-        } catch (error) {
-            console.error(`Error sending email notification (attempt ${retryCount + 1}):`, error);
-            if (retryCount < MAX_RETRIES - 1) {
-                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-                return sendWithRetry(retryCount + 1);
-            }
-            throw error;
+    transporter.sendMail(mailOptions, function(error, info) {
+        if (error) {
+            console.error('Error sending email:', error);
+        } else {
+            console.log('Email sent:', info.response);
         }
     });
 }
