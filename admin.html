@@ -328,6 +328,18 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Admin page loaded');
+            
+            // Debug localStorage
+            const storedOrders = localStorage.getItem('orders');
+            console.log('Stored orders:', storedOrders);
+            
+            if (!storedOrders) {
+                console.log('No orders found in localStorage');
+            } else {
+                console.log('Orders found:', JSON.parse(storedOrders));
+            }
+            
             updateStats();
             renderOrders();
         });

@@ -517,25 +517,16 @@
             document.getElementById('subtotal').textContent = `${productPrice} MAD`;
             document.getElementById('total').textContent = `${productPrice} MAD`;
 
+            // Validation functions and setup
+            const validationTimeout = null;
+
             // Phone number validation
             function isValidPhone(phone) {
                 const phoneRegex = /^(?:(?:\+|00)212|0)[5-7]\d{8}$/;
                 return phoneRegex.test(phone);
             }
 
-            // Real-time validation with debounce
-            let validationTimeout;
-            form.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', function() {
-                    clearTimeout(validationTimeout);
-                    validationTimeout = setTimeout(() => validateField(this), 300);
-                });
-
-                input.addEventListener('blur', function() {
-                    validateField(this);
-                });
-            });
-
+            // Field validation
             function validateField(field) {
                 const errorElement = document.getElementById(field.id + 'Error');
                 const formGroup = field.closest('.form-group');
@@ -566,31 +557,45 @@
                 return true;
             }
 
+            // Setup real-time validation
+            form.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(validationTimeout);
+                    validationTimeout = setTimeout(() => validateField(this), 300);
+                });
+
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+            });
+
+            // Update order summary
+            document.getElementById('productImage').src = productImage;
+            document.getElementById('productName').textContent = productName;
+            document.getElementById('productPrice').textContent = `${productPrice} MAD`;
+            document.getElementById('subtotal').textContent = `${productPrice} MAD`;
+            document.getElementById('total').textContent = `${productPrice} MAD`;
+
             // Form submission
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
-                formError.style.display = 'none';
-                formSuccess.style.display = 'none';
-                
-                let isValid = true;
-                form.querySelectorAll('input').forEach(input => {
-                    if (!validateField(input)) {
-                        isValid = false;
-                    }
-                });
-
-                if (!isValid) {
-                    formError.textContent = 'Veuillez corriger les erreurs dans le formulaire';
-                    formError.style.display = 'block';
-                    return;
-                }
-
-                form.classList.add('loading');
-                const submitButton = form.querySelector('button[type="submit"]');
-                submitButton.disabled = true;
-
                 try {
+                    // Validate form
+                    let isValid = true;
+                    form.querySelectorAll('input').forEach(input => {
+                        if (!validateField(input)) {
+                            isValid = false;
+                        }
+                    });
+
+                    if (!isValid) {
+                        formError.textContent = 'Veuillez corriger les erreurs dans le formulaire';
+                        formError.style.display = 'block';
+                        return;
+                    }
+
+                    // Get order data
                     const orderData = {
                         name: document.getElementById('name').value.trim(),
                         phone: document.getElementById('phone').value.trim(),
@@ -601,19 +606,21 @@
                         productImage: productImage
                     };
 
-                    // Show success message locally
-                    formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
-                    formSuccess.style.display = 'block';
-                    
-                    // Store order locally with initial status
-                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    // Create new order with status and timestamp
                     const newOrder = {
                         ...orderData,
                         id: Date.now(),
                         status: 'pending',
                         createdAt: new Date().toISOString()
                     };
+
+                    // Load existing orders
+                    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    
+                    // Add new order
                     orders.push(newOrder);
+                    
+                    // Save to localStorage
                     localStorage.setItem('orders', JSON.stringify(orders));
 
                     // Show success message
@@ -628,31 +635,23 @@
 
                     // Scroll to success message
                     formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
                 } catch (error) {
                     console.error('Error submitting order:', error);
-                    let errorMessage = error.message || 'Une erreur est survenue lors de la commande.';
-                    formError.textContent = errorMessage;
+                    formError.textContent = 'Une erreur est survenue lors de la commande. Veuillez réessayer.';
                     formError.style.display = 'block';
-                } finally {
-                    form.classList.remove('loading');
-                    submitButton.disabled = false;
                 }
-                        const errorMessage = responseData.details || 
-                            'Une erreur est survenue lors de la commande. ' +
-                            'Code: ' + response.status + ' - ' + response.statusText;
-                        throw new Error(errorMessage);
-                    }
-
-                    formSuccess.textContent = 'Votre commande a été enregistrée avec succès!';
-                    formSuccess.style.display = 'block';
-                    
-                    form.reset();
-                    form.querySelectorAll('.form-group').forEach(group => {
-                        group.classList.remove('success');
-                    });
-
-                    // Scroll to success message
-                    formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+    </script>
+</body>
+</html>
+            });
+        });
+    });
+  </script>
+</body>
+</html>
                 } catch (error) {
                     console.error('Error submitting order:', error);
                     let errorMessage = error.message || 'Une erreur est survenue lors de la commande.';
